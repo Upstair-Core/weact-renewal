@@ -1,0 +1,122 @@
+/* A home · the film (snap) — html.snap only. Ported from the scroll demo (28판): the hand moves the frames, a release
+   plays on to the next stop, each stop rests on the film's own keyframe as a sharp still. Wide screens keep the
+   left column of the stations (their type, their scrims); tall screens put the words below or above the subject.
+   Past the last stop the page scrolls on to the finale (#s5), shown as in the stack. */
+.snapfilm{display:none}
+html.snap,html.snap body{overscroll-behavior:none}
+html.snap body.owns{touch-action:none}
+html.snap .road > .stop:not(.fin){display:none}
+html.snap .snapfilm{display:block; position:relative; height:100vh; height:100svh; overflow:hidden; isolation:isolate; background:var(--night);
+  user-select:none; -webkit-user-select:none}
+.snapfilm .media{position:absolute; inset:0}
+.snapfilm video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; z-index:0; pointer-events:none; background:transparent}
+.snapfilm .still{position:absolute; inset:0; display:block; opacity:0; z-index:2; transform-origin:50% 50%; will-change:opacity, transform}
+.snapfilm .still img{display:block; width:100%; height:100%; object-fit:cover}
+.snapfilm .flash{position:absolute; inset:0; z-index:3; background:#FFFDF7; opacity:0; pointer-events:none}
+.snapfilm > .grain{z-index:3; opacity:.12; transition:opacity .7s var(--ease)}
+.snapfilm.day > .grain{opacity:0}
+
+/* scrims: the stations' own (night: deep teal from the left; day: morning mist), full while a stop holds, half while moving */
+.snapfilm .scrim{position:absolute; inset:0; z-index:4; pointer-events:none}
+.snapfilm .scrim::before,.snapfilm .scrim::after{content:""; position:absolute; inset:0; opacity:0; transition:opacity .6s var(--ease)}
+.snapfilm .scrim::before{background:var(--scrim-night)}
+.snapfilm .scrim::after{background:var(--scrim-day)}
+.snapfilm:not(.day) .scrim::before{opacity:.5}
+.snapfilm.day .scrim::after{opacity:.35}
+.snapfilm.hold:not(.day) .scrim::before{opacity:1}
+.snapfilm.hold.day .scrim::after{opacity:.85}
+/* the lawn keeps its light: a mist only where the words are, as the hero had */
+.snapfilm.hold.at0 .scrim::after{opacity:0}
+.snapfilm.at0 .scrim{background:
+  linear-gradient(90deg, rgba(246,248,247,.78) 0%, rgba(238,243,244,.56) 22%, rgba(238,243,244,.16) 38%, rgba(238,243,244,0) 48%),
+  linear-gradient(255deg, rgba(19,84,122,.5) 0%, rgba(31,127,140,.3) 22%, rgba(128,208,199,.12) 40%, rgba(128,208,199,0) 56%);
+  opacity:var(--ho,1); transition:opacity .5s var(--ease)}
+.snapfilm:not(.hold) .scrim{--ho:.35}
+
+/* the words at each stop: the station's column */
+.snapfilm .copy{position:absolute; z-index:6; left:var(--lx); width:calc(var(--u)*446); visibility:hidden; pointer-events:none;
+  transition:visibility 0s linear .3s}
+.snapfilm .copy.on{visibility:visible; pointer-events:auto; transition:visibility 0s}
+.snapfilm .copy[data-dpos="top"]{top:calc(var(--u)*80)}
+.snapfilm .copy[data-dpos="bottom"]{bottom:calc(var(--u)*96)}
+.snapfilm .copy.hero{width:calc(var(--u)*600)}
+.snapfilm .copy > *{opacity:0; transform:translateY(14px); transition:opacity .22s ease, transform .3s ease}
+.snapfilm .copy.on > *{opacity:1; transform:none; transition:opacity .55s ease, transform .8s cubic-bezier(.2,.7,.2,1)}
+.snapfilm .copy.on > :nth-child(2){transition-delay:.05s}
+.snapfilm .copy.on > :nth-child(3){transition-delay:.1s}
+.snapfilm .copy.on > :nth-child(4){transition-delay:.15s}
+.snapfilm .copy.on > :nth-child(5){transition-delay:.2s}
+.snapfilm .copy.on > :nth-child(6){transition-delay:.26s}
+.snapfilm .copy.t-night{text-shadow:0 1px 18px rgba(3,27,31,.35)}
+.snapfilm .copy .cards .nm{font-size:max(12.5px, calc(var(--u)*12.5)); line-height:1.35}
+.snapfilm .copy .cards .t,.snapfilm .copy .cards .sub.k{font-size:max(11.5px, calc(var(--u)*11))}
+.snapfilm .copy .cards{text-shadow:none}
+.snapfilm .copy .count{position:static; display:flex; flex-direction:column; gap:calc(var(--u)*6); margin:calc(var(--u)*24) 0 0}
+.snapfilm .copy .count small{font:800 max(13px, calc(var(--u)*14))/1.3 var(--display); letter-spacing:-.01em}
+.snapfilm .copy .count b{font:900 max(40px, calc(var(--u)*60))/.95 var(--display); letter-spacing:-.045em; font-variant-numeric:tabular-nums; color:var(--key)}
+.snapfilm .copy.t-night .count b{color:#80d0c7}
+
+.snapfilm .cue{position:absolute; z-index:6; left:var(--lx); bottom:calc(var(--u)*26); opacity:0; transition:opacity .4s var(--ease); pointer-events:none}
+.snapfilm.fresh .cue{opacity:1}
+.snapfilm .chip{position:absolute; z-index:7; top:calc(env(safe-area-inset-top, 0px) + 84px); left:50%; transform:translateX(-50%); max-width:calc(100% - 32px);
+  font-size:12px; line-height:1.4; padding:6px 12px; border-radius:999px; background:rgba(3,27,31,.72); color:#f1f5f4; opacity:0; transition:opacity .25s ease; text-align:center}
+.snapfilm .chip.on{opacity:1}
+
+/* the rail over the film: the stations' rail (left column, under the words); hidden on the lawn as before.
+   Once the film has scrolled away (html.past) it is the stack's bar along the bottom, over the finale */
+@media (min-aspect-ratio: 1/1){
+  html.snap:not(.past) .rail{left:var(--lx); right:auto; bottom:calc(var(--u)*18); width:calc(var(--u)*446); height:calc(var(--u)*34); padding:0}
+  html.snap:not(.past) .rail::before{display:none}
+  html.snap:not(.past) .rail .line,html.snap:not(.past) .rail .fill{top:calc(var(--u)*12)}
+  html.snap:not(.past) .rail a{top:calc(var(--u)*4); height:calc(var(--u)*30)}
+  html.snap:not(.past) .rail a span{top:calc(var(--u)*15)}
+  html.snap:not(.past) .rail .cam{top:calc(var(--u)*4)}
+}
+/* wide screens, per stop: 01's column stays left of the crew's back (WE ACT! and the hood); at 03 the thumbnails make
+   one row so the column ends above the dog's head */
+@media (min-aspect-ratio: 1/1){
+  .snapfilm .copy[data-i="1"]{width:min(calc(var(--u)*446), calc(27vw - var(--lx)))}
+  .snapfilm .copy[data-i="3"] .cards{grid-template-columns:repeat(6, minmax(0,1fr)); gap:calc(var(--u)*8)}
+  .snapfilm .copy[data-i="3"] .cards .row .t{display:none}
+}
+html.snap.at-top .rail{opacity:0; pointer-events:none}
+html.snap.moving .rail .next{opacity:1}
+
+/* tall screens (phones): the film fills the screen, the centre 448:720 band; words below or above the subject */
+@media (max-aspect-ratio: 1/1){
+  .snapfilm .copy{left:var(--lx); right:var(--rx); width:auto}
+  .snapfilm .copy.hero{width:auto}
+  .snapfilm .copy[data-pos="top"]{top:calc(env(safe-area-inset-top, 0px) + 72px); bottom:auto}
+  .snapfilm .copy[data-pos="bottom"]{top:auto; bottom:calc(env(safe-area-inset-bottom, 0px) + 74px)}
+  .snapfilm .copy .hd{margin-top:8px; gap:12px}
+  .snapfilm .copy .hd .num{font-size:30px}
+  .snapfilm .copy .hd .nm{font-size:24px}
+  .snapfilm .copy .lede{font-size:16.5px; margin-top:8px; line-height:1.45}
+  .snapfilm .copy .desc{font-size:13.5px; line-height:1.6; margin-top:4px; max-width:none}
+  .snapfilm .copy.hero h1{font-size:24px; line-height:1.36}
+  /* thumbnails: one row the thumb can slide sideways */
+  .snapfilm .copy .cards{display:flex; gap:8px; overflow-x:auto; overscroll-behavior-x:contain; margin:12px calc(var(--rx) * -1) 0 calc(var(--lx) * -1);
+    padding:0 var(--rx) 2px var(--lx); scrollbar-width:none; touch-action:pan-x}
+  .snapfilm .copy .cards::-webkit-scrollbar{display:none}
+  .snapfilm .copy .cards li{flex:0 0 112px}
+  .snapfilm .copy .cards .card .pic{box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+  .snapfilm .copy .count{margin-top:12px}
+  .snapfilm .copy .count b{font-size:34px}
+  .snapfilm .copy .count small{font-size:12.5px}
+  /* scrims run from the edge the words sit on */
+  .snapfilm .scrim::before{background:linear-gradient(0deg, rgba(3,27,31,.9) 0%, rgba(6,46,51,.72) 26%, rgba(10,63,69,.3) 46%, rgba(10,63,69,0) 60%),
+    linear-gradient(180deg, rgba(3,27,31,.55) 0%, rgba(6,46,51,0) 14%)}
+  .snapfilm[data-pos="top"] .scrim::before{background:linear-gradient(180deg, rgba(3,27,31,.9) 0%, rgba(6,46,51,.72) 30%, rgba(10,63,69,.3) 50%, rgba(10,63,69,0) 64%),
+    linear-gradient(0deg, rgba(3,27,31,.5) 0%, rgba(6,46,51,0) 14%)}
+  .snapfilm .scrim::after{background:linear-gradient(0deg, rgba(246,248,247,.94) 0%, rgba(238,243,244,.8) 24%, rgba(219,232,231,.3) 44%, rgba(219,232,231,0) 58%),
+    linear-gradient(180deg, rgba(246,248,247,.6) 0%, rgba(246,248,247,0) 13%)}
+  .snapfilm[data-pos="top"] .scrim::after{background:linear-gradient(180deg, rgba(246,248,247,.94) 0%, rgba(238,243,244,.82) 30%, rgba(219,232,231,.3) 50%, rgba(219,232,231,0) 64%),
+    linear-gradient(0deg, rgba(246,248,247,.5) 0%, rgba(246,248,247,0) 14%)}
+  .snapfilm.at0 .scrim{background:linear-gradient(0deg, rgba(246,248,247,.9) 0%, rgba(238,243,244,.66) 22%, rgba(238,243,244,0) 42%)}
+  .snapfilm .cue{display:none}
+  .snapfilm .chip{top:auto; bottom:calc(env(safe-area-inset-bottom, 0px) + 66px)}
+  .snapfilm[data-pos="bottom"] .chip{top:calc(env(safe-area-inset-top, 0px) + 72px); bottom:auto}
+}
+@media (prefers-reduced-motion: reduce){
+  .snapfilm .copy > *,.snapfilm .copy.on > *{transition:opacity .3s ease; transform:none}
+}

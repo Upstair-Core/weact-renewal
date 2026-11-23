@@ -5,6 +5,7 @@
 .snapfilm{display:none}
 html.snap,html.snap body{overscroll-behavior:none}
 html.snap body.owns{touch-action:none}
+html.snap:not(.snap-on) body{touch-action:none}     /* before snap.js runs: no native scroll under a finger (head guard) */
 html.snap .road{display:none}                     /* every station, 집 included, is now a stop inside the film */
 html.snap .snapfilm{display:block; position:relative; height:100vh; height:100svh; overflow:hidden; isolation:isolate; background:var(--night);
   user-select:none; -webkit-user-select:none}

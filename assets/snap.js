@@ -914,5 +914,6 @@
 
   scrollTo(0, 0);
   updateUI(); onScroll(); fitCopies(); publish();
+  root.classList.add('snap-on');                          // the head's guard lets go: the film owns the hand from here
   loadMedia();
 })();

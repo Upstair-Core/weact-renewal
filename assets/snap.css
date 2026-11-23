@@ -131,20 +131,20 @@ html.snap.moving .rail .next{opacity:1}
   .snapfilm .copy[data-pos="top"]{top:calc(env(safe-area-inset-top, 0px) + 72px); bottom:auto}
   .snapfilm .copy[data-pos="bottom"]{top:auto; bottom:calc(env(safe-area-inset-bottom, 0px) + 74px)}
   .snapfilm .copy .hd{margin-top:8px; gap:12px}
-  .snapfilm .copy .hd .num{font-size:30px}
-  .snapfilm .copy .hd .nm{font-size:24px}
-  .snapfilm .copy .lede{font-size:16.5px; margin-top:8px; line-height:1.45}
-  .snapfilm .copy .desc{font-size:13.5px; line-height:1.6; margin-top:4px; max-width:none}
-  .snapfilm .copy.hero h1{font-size:24px; line-height:1.36}
+  .snapfilm .copy .hd .num{font-size:calc(30px * var(--fs, 1))}
+  .snapfilm .copy .hd .nm{font-size:calc(24px * var(--fs, 1))}
+  .snapfilm .copy .lede{font-size:calc(16.5px * var(--fs, 1)); margin-top:8px; line-height:1.45}
+  .snapfilm .copy .desc{font-size:calc(13.5px * var(--fs, 1)); line-height:1.6; margin-top:4px; max-width:none}
+  .snapfilm .copy.hero h1{font-size:calc(24px * var(--fs, 1)); line-height:1.36}
   /* thumbnails: one row the thumb can slide sideways */
   .snapfilm .copy .cards{display:flex; gap:8px; overflow-x:auto; overscroll-behavior-x:contain; margin:12px calc(var(--rx) * -1) 0 calc(var(--lx) * -1);
     padding:0 var(--rx) 2px var(--lx); scrollbar-width:none; touch-action:pan-x}
   .snapfilm .copy .cards::-webkit-scrollbar{display:none}
-  .snapfilm .copy .cards li{flex:0 0 112px}
+  .snapfilm .copy .cards li{flex:0 0 calc(112px * var(--fs, 1))}
   .snapfilm .copy .cards .card .pic{box-shadow:0 0 0 1px rgba(255,255,255,.12)}
   .snapfilm .copy .count{margin-top:12px}
-  .snapfilm .copy .count b{font-size:34px}
-  .snapfilm .copy .count small{font-size:12.5px}
+  .snapfilm .copy .count b{font-size:calc(34px * var(--fs, 1))}
+  .snapfilm .copy .count small{font-size:calc(12.5px * var(--fs, 1))}
   /* scrims: bottom layer and top layer, each only fades */
   .snapfilm[data-pos="top"]{--bot:0; --top:1}
   .snapfilm .scrim.hi{display:block}
@@ -161,12 +161,14 @@ html.snap.moving .rail .next{opacity:1}
   /* 집 on a tall screen: the wall fills the film area as the other stops do. WE takes columns 10–19 and rows 2–8 of
      the 22×12 wall, so squares are 1/11 of the width, WE centred across the screen under the masthead, its legend
      under WE, the words low over the morning mist */
-  .snapfilm .finwall .mosaic{--tw:calc(100vw / 11); width:calc(var(--tw) * 22); height:calc(var(--tw) * 12); translate:none;
+  .snapfilm .finwall{--tw:calc(100vw / 11)}
+  .snapfilm .finwall .mosaic{width:calc(var(--tw) * 22); height:calc(var(--tw) * 12); translate:none;
     left:calc(50vw - var(--tw) * 15); top:calc(env(safe-area-inset-top, 0px) + 76px - var(--tw) * 2)}
   .snapfilm .finwall .mosaic ul{gap:1px}
-  .snapfilm .finwall .key{left:var(--lx); right:auto; bottom:auto; top:calc(env(safe-area-inset-top, 0px) + 76px + 100vw / 11 * 7 + 14px); white-space:normal; display:inline-flex; max-width:calc(100vw - 32px)}
+  .snapfilm .finwall .key{left:var(--lx); right:auto; bottom:auto; top:calc(env(safe-area-inset-top, 0px) + 76px + var(--tw) * 7 + 14px); white-space:normal; display:inline-flex; max-width:calc(100vw - 32px)}
+  .snapfilm.nokey .finwall .key{display:none}
   .snapfilm .copy.fin{width:auto}
-  .snapfilm .copy.fin h2{font-size:27px}
+  .snapfilm .copy.fin h2{font-size:calc(27px * var(--fs, 1))}
   .snapfilm .mist{background:linear-gradient(0deg, rgba(246,248,247,.96) 0%, rgba(238,243,244,.9) 30%, rgba(219,232,231,.45) 44%, rgba(219,232,231,0) 54%)}
   .snapfilm .snapchip{top:auto; bottom:calc(env(safe-area-inset-bottom, 0px) + 66px)}
   .snapfilm[data-pos="bottom"] .snapchip{top:calc(env(safe-area-inset-top, 0px) + 72px); bottom:auto}

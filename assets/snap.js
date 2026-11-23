@@ -927,32 +927,56 @@
     const ft = film.getBoundingClientRect().top;
     const railTop = rail.getBoundingClientRect().top - ft, headBot = hd.getBoundingClientRect().bottom - ft;
     const minF = wide ? (innerHeight < 800 ? .64 : .78) : .84;
+    // wide screens scale the column's frame unit (their type is in u); tall screens scale the phone type (--fs, in px)
+    const scale = (c, f) => {
+      c.style.removeProperty('--u'); c.style.removeProperty('--fs');
+      if (f !== 1) { if (wide) c.style.setProperty('--u', `calc(var(--u0) * ${f.toFixed(3)})`); else c.style.setProperty('--fs', f.toFixed(3)); }
+    };
+    const fw = film.querySelector('.finwall');
+    if (fw) { fw.style.removeProperty('--tw'); film.classList.remove('nokey'); }
     copies.forEach((c) => {
       if (c.classList.contains('hero')) return;
-      c.style.removeProperty('--u'); c.classList.remove('onerow', 'nodesc', 'nocards', 'nocredit');
+      scale(c, 1); c.classList.remove('onerow', 'nodesc', 'nocards', 'nocredit');
+      if (!wide && fw && c.dataset.i === String(LAST)) { fitFin(c, fw, ft); return; }
       const low = wide ? c.dataset.dpos === 'bottom' : c.dataset.pos === 'bottom';
-      const key = !wide && c.dataset.i === String(LAST) && film.querySelector('.finwall .key');
-      const ceil = key ? key.getBoundingClientRect().bottom - ft : headBot;
-      const over = () => { const r = c.getBoundingClientRect(); return low ? (ceil + 8) - (r.top - ft) : (r.bottom - ft) - (railTop - 14); };
-      const shrink = () => {
+      const over = () => { const r = c.getBoundingClientRect(); return low ? (headBot + 8) - (r.top - ft) : (r.bottom - ft) - (railTop - 14); };
+      const shrink = (lo = minF) => {
         let f = 1;
-        for (let k = 0; k < 6; k++) {
+        for (let k = 0; k < 8; k++) {
           const o = over(); if (o <= 0) return true;
-          f = Math.max(minF, f * (1 - o / c.offsetHeight) - .01);
-          c.style.setProperty('--u', `calc(var(--u0) * ${f.toFixed(3)})`);
-          if (f === minF) return over() <= 0;
+          f = Math.max(lo, f * (1 - o / c.offsetHeight) - .01); scale(c, f);
+          if (f === lo) return over() <= 0;
         }
         return over() <= 0;
       };
       if (shrink()) return;
-      if (c.querySelector('.cards')) { c.style.removeProperty('--u'); c.classList.add('onerow'); if (shrink()) return; }
-      if (c.querySelector('.credit')) { c.style.removeProperty('--u'); c.classList.add('nocredit'); if (shrink()) return; }   // 집 on a small phone: the fine print goes first
-      c.classList.add('nodesc'); if (shrink()) return;
-      // a short landscape phone (about 390 px tall): smaller still, and last the thumbnails give way to the words
-      const f0 = minF; let f = f0;
-      while (over() > 0 && f > .5) { f = Math.max(.5, f - .04); c.style.setProperty('--u', `calc(var(--u0) * ${f.toFixed(3)})`); }
-      if (over() > 0) { c.classList.add('nocards'); c.style.removeProperty('--u'); shrink(); }
+      if (c.querySelector('.cards')) { scale(c, 1); c.classList.add('onerow'); if (shrink()) return; }
+      scale(c, 1); c.classList.add('nodesc'); if (shrink()) return;
+      if (shrink(.6)) return;                              // a short landscape phone: smaller still
+      c.classList.add('nocards'); scale(c, 1); shrink(.6);  // and last the thumbnails give way to the words
     });
+    if (typeof sizeWall === 'function') sizeWall();
+  }
+  // 집 on a tall screen: WE (rows 2–8 of the wall) from under the masthead, the legend under it, the words low. The words
+  // largest squares (up to 1/11 of the width) that leave room for the legend are used; below 1/19 the fine print, a little
+  // of the words' size, the legend, then the long sentence give way, in that order.
+  function fitFin(c, fw, ft) {
+    const vw = innerWidth, mos = fw.querySelector('.mosaic'), key = fw.querySelector('.key');
+    const weTop = () => { const r = mos.getBoundingClientRect(); return r.top - ft + 2 * r.height / 12; };
+    const room = () => {
+      const copyTop = c.getBoundingClientRect().top - ft;
+      const keyH = film.classList.contains('nokey') || !key ? 0 : key.offsetHeight + 14;
+      return (copyTop - 12 - keyH - weTop()) / 7;
+    };
+    // what gives way, in order: the fine print, a little of the words' size, then the legend, then the long sentence
+    const steps = [() => {}, () => c.classList.add('nocredit'), () => c.style.setProperty('--fs', '.88'), () => film.classList.add('nokey'), () => c.classList.add('nodesc')];
+    let tw = vw / 11;
+    for (const step of steps) {
+      step(); fw.style.removeProperty('--tw');
+      tw = Math.min(vw / 11, room());
+      if (tw >= vw / 19) break;                            // WE still reads at a nineteenth of the width (about 20 px squares)
+    }
+    fw.style.setProperty('--tw', Math.max(vw / 24, tw).toFixed(2) + 'px');
   }
   addEventListener('resize', () => { clearTimeout(fitCopies._t); fitCopies._t = setTimeout(fitCopies, 120); });
   addEventListener('load', fitCopies);

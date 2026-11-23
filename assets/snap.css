@@ -168,3 +168,32 @@ html.snap.moving .rail .next{opacity:1}
 @media (prefers-reduced-motion: reduce){
   .snapfilm .copy > *,.snapfilm .copy.on > *{transition:opacity .3s ease; transform:none}
 }
+
+/* the give bar (site.css: the one on B's cover and the road hero; added 2026-11-23). Wide screens: along the bottom of the
+   lawn, from the column's edge, while the first stop's words are up (.copy.hero.on, a sibling before it); those words and
+   the cue stand above it (--qb: the bar's top, 72px tall). It comes and goes as the words do; the give dock (site.css)
+   comes in once it has gone (site.js listens for the end of its fade, since the film scrolls nothing). */
+.snapfilm > .qgive{display:none}
+@media (min-aspect-ratio: 1/1) and (min-width:1024px){
+  .snapfilm{--qb:calc(var(--u)*34 + 72px)}
+  .snapfilm > .qgive{display:grid; position:absolute; z-index:6; left:var(--lx); bottom:calc(var(--u)*34); width:min(1100px, calc(100vw - var(--lx) - var(--rx)));
+    opacity:0; visibility:hidden; transform:translateY(14px); transition:opacity .22s ease, transform .3s ease, visibility 0s linear .3s}
+  .snapfilm .copy.hero.on ~ .qgive{opacity:1; visibility:visible; transform:none; transition:opacity .55s ease .2s, transform .8s cubic-bezier(.2,.7,.2,1) .2s, visibility 0s}
+  .snapfilm .copy.hero[data-dpos="bottom"]{bottom:calc(var(--qb) + var(--u)*86)}
+  .snapfilm .cue{bottom:calc(var(--qb) + var(--u)*22)}
+}
+/* narrower than the bar's 1100px: the line of why goes, so the row stays one line high (as on B's cover) */
+@media (min-aspect-ratio: 1/1) and (min-width:1024px) and (max-width:1239px){
+  .snapfilm > .qgive{grid-template-columns:auto minmax(150px,1fr) auto auto}
+  .snapfilm > .qgive .qg-t{display:none}
+  .snapfilm > .qgive .seg{border-left:0}
+}
+/* up to 1023px wide (phones) there is no room for the bar: the dock, a bar along the bottom standing on the rail
+   (home.css: 62px up), is there from the first stop, so the words that sit low (and the loading chip) stand above it */
+@media (max-aspect-ratio: 1/1) and (max-width:1023px){
+  .snapfilm .copy[data-pos="bottom"]{bottom:calc(env(safe-area-inset-bottom, 0px) + 132px)}
+  .snapfilm .snapchip{bottom:calc(env(safe-area-inset-bottom, 0px) + 132px)}
+}
+@media (min-aspect-ratio: 1/1) and (max-width:1023px){
+  .snapfilm .copy[data-dpos="bottom"]{bottom:max(calc(var(--u)*96), 132px)}
+}

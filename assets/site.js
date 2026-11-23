@@ -249,7 +249,10 @@
     const isB = () => html.dataset.v === 'b', docked = () => html.dataset.v !== 'c';
     const onDonate = document.body.dataset.page === 'donate';
     const seg = $$('.vd-seg button', dock), go = $('.vd-go', dock);
-    const qbar = $('.qgive'), foot = $('.foot');
+    // the give bar on the first screen: the A home has two (one in the snap film, one on the road), and the one its mode
+    // does not use is display:none, which has no box
+    const bars = $$('.qgive'), foot = $('.foot');
+    const barNow = () => bars.find(q => q.getClientRects().length);
     const paint = () => {
       seg.forEach((b, i) => b.setAttribute('aria-pressed', i === give.mode));
       go.href = seg[give.mode].dataset.href;
@@ -260,16 +263,22 @@
     // it waits until the cover's bar has gone (or, on other pages, until the first screen has), and steps aside for the footer
     const show = () => {
       let v = docked() && !onDonate && !dr.classList.contains('open');
+      const qbar = barNow();
       // the bar fades by an inline opacity on B's cover (b.js) and by --ho in the A hero (home.css): the computed value
       if (v && qbar) { const r = qbar.getBoundingClientRect(), o = parseFloat(qbar.style.opacity || getComputedStyle(qbar).opacity);
         v = !(o > .5 && r.bottom > 0 && r.top < innerHeight && getComputedStyle(qbar).visibility !== 'hidden'); }
-      else if (v) v = scrollY > innerHeight * .7;
+      // no bar: a page waits until its first screen has gone. The A home's snap film keeps the page still and, on a phone,
+      // has no room for the bar: there the dock is the bar, from the start
+      else if (v && !html.classList.contains('snap')) v = scrollY > innerHeight * .7;
       // (the A home in film mode draws no footer: display:none has no box, and its top would read 0)
       if (v && foot && foot.getClientRects().length) v = foot.getBoundingClientRect().top > innerHeight - 24;
       dock.classList.toggle('in', v);
     };
     window.weactDock = show;
     addEventListener('scroll', show, { passive: true }); addEventListener('resize', show); document.addEventListener('variant', show); show();
+    // a bar that has finished fading in or out moves the dock even when nothing scrolled (the snap film's bar goes with
+    // its first words; B's settles .25 s after the last scroll)
+    bars.forEach(q => q.addEventListener('transitionend', e => { if (e.target === q) show(); }));
     let back = null;
     const open = () => {
       back = document.activeElement; dr.hidden = false; veil.hidden = false;

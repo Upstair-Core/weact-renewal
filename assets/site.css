@@ -301,6 +301,7 @@ kbd{font:400 max(11px, calc(var(--u)*11))/1 var(--sans); border:1px solid var(--
 .years li .m{font-size:max(12.5px, calc(var(--u)*12.5)); color:var(--fg-3); font-variant-numeric:tabular-nums; letter-spacing:.06em; padding-top:2px}
 .years li .e{display:flex; flex-wrap:wrap; gap:4px calc(var(--u)*18); font-size:max(14.5px, calc(var(--u)*15))}
 .years li .e span{white-space:nowrap}
+html[lang="en"] .years li .e span{white-space:normal}   /* an English event is a sentence, not a few words: it wraps */
 .years li.mark .e{color:var(--fg); font-family:var(--display); font-weight:600}
 .years li.mark .m{color:var(--accent)}
 

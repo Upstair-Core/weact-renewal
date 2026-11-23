@@ -99,9 +99,10 @@
 .tags li{padding:7px 12px; background:var(--mist); font:700 13.5px/1.3 var(--display)}
 .tags.good li{background:var(--key-2); color:var(--key)}
 .tags.no li{background:none; box-shadow:inset 0 0 0 1px var(--ln-2); color:var(--fg-2)}
-.note{padding:16px 18px; background:var(--mist)}
-.note h3{margin:0 0 6px; font:800 13px/1.4 var(--display); color:var(--key)}
-.note .t{font-size:15.5px}
+/* dnote, not note: site.css's .note is the home's floating photo label (absolute, nowrap, faded in), which hid these */
+.dnote{padding:16px 18px; background:var(--mist)}
+.dnote h3{margin:0 0 6px; font:800 13px/1.4 var(--display); color:var(--key)}
+.dnote .t{font-size:15.5px}
 .pending{padding:18px; background:var(--mist); color:var(--fg-2)}
 
 @media (max-width:1023px), (max-height:559px){
@@ -110,7 +111,7 @@
   .acts,.steps{grid-template-columns:1fr}
   .steps li{border-bottom:1px solid var(--ln)}
   .dog{padding-top:72px}
-  .dlayout{grid-template-columns:1fr; grid-template-areas:"gal" "side" "body"}
+  .dlayout{grid-template-columns:minmax(0,1fr); grid-template-areas:"gal" "side" "body"}   /* minmax: the full-bleed card must not widen the column past the phone */
   .dside{position:static; margin-top:16px; max-height:none; overflow:visible}
   .dgal{margin:0 -16px} .gal .main{max-height:none; aspect-ratio:1} .gal .thumbs{padding:0 16px}
   .scard{padding:20px 16px; border:0; margin:0 -16px; border-bottom:1px solid var(--ln)}
@@ -223,7 +224,7 @@
 .source .by{margin:0 0 14px; font:700 15px/1.4 var(--display)}
 .source .by small{display:block; margin-bottom:4px; font:400 12px/1.4 var(--sans); color:var(--fg-2)}
 .source .btn{margin:0}
-.source .note{margin:12px 0 0; font-size:13px; line-height:1.6; color:var(--fg-2)}
+.source .snote{margin:12px 0 0; font-size:13px; line-height:1.6; color:var(--fg-2)}
 .minis a.np{grid-template-columns:1fr}
 
 /* ================= B안 입양 상세 (BC SPCA order) ================= */

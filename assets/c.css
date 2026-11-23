@@ -98,6 +98,8 @@
 @media (max-width:1023px){
   .c-hero .in{padding-bottom:84px}
   .c-hero h1{font-size:34px; line-height:1.25}
+  html[lang="en"] .c-hero h1 br{display:none}   /* the desktop break leaves 'animals' alone on a phone: let the line fall where it fits */
+  html[lang="en"] .c-hero h1{text-wrap:balance}
   .chome h2{font-size:30px}
   .c-band b{font-size:46px}
   .c-band .wrap{grid-template-columns:1fr; gap:26px}

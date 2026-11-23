@@ -171,7 +171,7 @@ html:not(.hb) .note.dark .desc{color:rgba(6,46,51,.86)}
 html:not(.hb) .note.dark .count b{color:#054763; background:linear-gradient(90deg, #054763 0%, #2a7b9b 55%, #61b5b8 100%); -webkit-background-clip:text; background-clip:text}
 html:not(.hb) .news,html:not(.hb) .news a{border-color:var(--ln)}
 html:not(.hb) .b-rail{display:none}
-html:not(.hb) .qgive{position:relative; left:auto; bottom:auto; translate:none; width:calc(100% - 32px); margin:0 16px 24px; grid-template-columns:1fr; padding:6px}
+html:not(.hb) .qgive{position:relative; left:auto; bottom:auto; translate:none; width:calc(100% - 32px); margin:0 16px 24px; grid-template-columns:minmax(0,1fr); padding:6px}   /* minmax: the English amount row must not widen the card past the phone */
 html:not(.hb) .qgive > *{padding:12px}
 html:not(.hb) .qgive > * + *{border-left:0; border-top:1px solid rgba(6,46,51,.12)}
 html:not(.hb) .qgive .chips.amts{flex-wrap:wrap}

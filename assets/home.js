@@ -427,10 +427,10 @@
 (function () {
   const html = document.documentElement;
   if (html.classList.contains('film')) return;
+  if (html.classList.contains('snap')) return;   // snap.js owns the home in snap mode; the hidden road's pictures stay unfetched
   document.querySelectorAll('img[data-src]').forEach(im => {
     im.loading = 'lazy'; im.sizes = '100vw'; im.srcset = im.dataset.srcset || ''; im.src = im.dataset.src;
   });
-  if (html.classList.contains('snap')) return;   // snap.js drives the rail over the film (snap mode)
   const ticks = [...document.querySelectorAll('.rail a')], secs = ticks.map(a => document.getElementById(a.getAttribute('href').slice(1)));
   const cam = document.querySelector('.rail .cam'), fill = document.querySelector('.rail .fill');
   const top = document.querySelector('.top'), rail = document.querySelector('.rail'), all = [...document.querySelectorAll('.road > .stop')];

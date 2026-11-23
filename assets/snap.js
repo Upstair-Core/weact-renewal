@@ -79,8 +79,8 @@
       V[k].ok[d] = true;
       once(v, 'loadedmetadata', () => { prime(); kick(); }, 10000);
       kick();
+      if (k === 0 && d === 'f') loadWall();               // the wall's one picture rides right behind the first stretch
     }
-    if (token === loadToken) loadWall();
   }
 
   /* ---------- state ---------- */
@@ -742,7 +742,8 @@
      family light left to right and stay, drawing WE, which settles into act teal; the count climbs. As 264 photo
      elements fading with grayscale filters and a multiply layer each, it stuttered (operator: 'WE 타일 기반 애니매이션쪽이
      버벅인다'), so the same timing is drawn here: grey and colour copies of each picture, opacity eased like the CSS
-     (0.9 s, teal 1.2 s), one canvas layer. Pictures load after the film's media, or when the film nears 집. */
+     (0.9 s, teal 1.2 s), one canvas layer. The 264 pictures come as one image (media/film/wall.webp, 22×12 squares of
+     128 px in the wall's order; operator: '이미지가 로딩 왜이리 느린거지? 타일들?'), fetched once the film's first stretch is in. */
   const mosaic = film.querySelector('.finwall .mosaic');
   const tileEls = mosaic ? [...mosaic.querySelectorAll('li')] : [];
   const COLS = mosaic ? (+getComputedStyle(mosaic).getPropertyValue('--cols') || 22) : 22;
@@ -753,14 +754,16 @@
     const c = i % COLS, we = li.classList.contains('w'), im = li.querySelector('img');
     const a = we ? .3 + .42 * (c - 10) / 9 + .03 * rnd() : .03 + .4 * rnd();   // when it lights
     const b = we ? 9 : a + .14 + .12 * rnd();                                  // when it goes quiet again (never, for WE)
-    return { i, c, r: Math.floor(i / COLS), we, a, b, src: im ? (im.dataset.tile || im.dataset.src || '') : '', img: null, gray: null, on: false, m: 0, o: .2 };
+    return { i, c, r: Math.floor(i / COLS), we, a, b, on: false, m: 0, o: .2, wk: -1 };
   });
+  const ATLAS = mosaic ? mosaic.dataset.atlas : '', TS = mosaic ? (+mosaic.dataset.ts || 128) : 128;
+  let atlas = null, atlasGray = null, weGray = null;
   const wallC = document.createElement('canvas');
   let wctx = null, wDpr = 1, wW = 0, wH = 0, gap = 2, formed = false, teal = 0, wallLoad = false, wallRaf = 0, wallLast = 0, wallDirty = true;
   if (mosaic) { wallC.setAttribute('aria-hidden', 'true'); mosaic.appendChild(wallC); mosaic.classList.add('drawn'); }
   const canFilter = (() => { try { const x = document.createElement('canvas').getContext('2d'); if (!('filter' in x)) return false; x.filter = 'grayscale(1)'; return x.filter === 'grayscale(1)'; } catch (e) { return false; } })();
   function grayOf(im, we) {                               // CSS grayscale(1) (+ the WE squares' brightness 1.12, contrast 1.05)
-    const c = document.createElement('canvas'); c.width = im.naturalWidth || 160; c.height = im.naturalHeight || 160;
+    const c = document.createElement('canvas'); c.width = im.naturalWidth || im.width || 160; c.height = im.naturalHeight || im.height || 160;
     const x = c.getContext('2d');
     if (canFilter) { x.filter = we ? 'grayscale(1) brightness(1.12) contrast(1.05)' : 'grayscale(1)'; x.drawImage(im, 0, 0, c.width, c.height); return c; }
     x.drawImage(im, 0, 0, c.width, c.height);
@@ -775,22 +778,20 @@
     } catch (e) {}
     return c;
   }
-  // grey copies are made a few at a time (at most ~5 ms a frame), so a burst of pictures arriving never holds a frame
-  const grayQ = []; let grayRaf = 0;
-  function pumpGray() {
-    grayRaf = 0; const t0 = now();
-    while (grayQ.length && now() - t0 < 5) { const t = grayQ.shift(); t.gray = grayOf(t.im, false); if (t.we) t.grayWe = grayOf(t.im, true); t.img = t.im; }
-    wallDirty = true; kickWall();
-    if (grayQ.length) grayRaf = requestAnimationFrame(pumpGray);
-  }
   function loadWall() {
-    if (wallLoad || !mosaic) return; wallLoad = true;
-    tiles.forEach((t) => {
-      if (!t.src) return;
-      const im = new Image(); im.decoding = 'async';
-      im.onload = () => { (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => { t.im = im; grayQ.push(t); if (!grayRaf) grayRaf = requestAnimationFrame(pumpGray); }); };
-      im.src = t.src;
+    if (wallLoad || !mosaic || !ATLAS) return; wallLoad = true;
+    const im = new Image(); im.decoding = 'async';
+    im.onload = () => (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => {
+      atlas = im; wallDirty = true; kickWall();                       // colour first; grey copies on the next frames
+      requestAnimationFrame(() => {
+        atlasGray = grayOf(im, false);
+        const we = tiles.filter((t) => t.we), c = document.createElement('canvas'); c.width = Math.max(1, we.length) * TS; c.height = TS;
+        const x = c.getContext('2d');
+        we.forEach((t, k) => { t.wk = k; x.drawImage(im, t.c * TS, t.r * TS, TS, TS, k * TS, 0, TS, TS); });
+        weGray = grayOf(c, true); wallDirty = true; kickWall();
+      });
     });
+    im.src = ATLAS;
   }
   function sizeWall() {
     if (!mosaic) return;
@@ -814,16 +815,17 @@
       if (Math.abs(t.o - oTo) > .002) { t.o += (oTo - t.o) * k; moving = true; } else t.o = oTo;
       const px = t.c * (cw + gap), py = t.r * (ch + gap);
       x.globalAlpha = 1; x.fillStyle = '#dbe8e7'; x.fillRect(px, py, cw, ch);   // --teal-100 under every square
-      if (!t.img) continue;
+      if (!atlas) continue;
+      const sx = t.c * TS, sy = t.r * TS;
       if (t.we && teal > 0) {                                                    // WE: grey, brighter, then act teal multiplied in
-        x.globalAlpha = 1 - teal; x.drawImage(t.img, px, py, cw, ch);
-        x.globalAlpha = teal; x.drawImage(t.grayWe, px, py, cw, ch);
+        x.globalAlpha = 1 - teal; x.drawImage(atlas, sx, sy, TS, TS, px, py, cw, ch);
+        if (weGray) { x.globalAlpha = teal; x.drawImage(weGray, t.wk * TS, 0, TS, TS, px, py, cw, ch); }
         x.globalCompositeOperation = 'multiply'; x.globalAlpha = teal; x.fillStyle = '#0b6e78'; x.fillRect(px, py, cw, ch);
         x.globalCompositeOperation = 'source-over';
         continue;
       }
-      if (t.m < 1) { x.globalAlpha = t.o * (1 - t.m); x.drawImage(t.gray, px, py, cw, ch); }
-      if (t.m > 0) { x.globalAlpha = (t.we ? 1 : .92) * t.m; x.drawImage(t.img, px, py, cw, ch); }
+      if (t.m < 1 && atlasGray) { x.globalAlpha = t.o * (1 - t.m); x.drawImage(atlasGray, sx, sy, TS, TS, px, py, cw, ch); }
+      if (t.m > 0) { x.globalAlpha = (t.we ? 1 : .92) * t.m; x.drawImage(atlas, sx, sy, TS, TS, px, py, cw, ch); }
     }
     x.globalAlpha = 1;
     return moving;

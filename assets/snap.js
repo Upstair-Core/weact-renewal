@@ -691,7 +691,7 @@
     film.classList.toggle('atfin', S.mode === 'idle' && S.at === LAST);
     finWatch();
     if (hd._day !== day) { hd._day = day; hd.classList.toggle('t-day', day); rail.classList.toggle('t-day', day); film.classList.toggle('day', day); }
-    film.classList.toggle('hold', !past && S.mode === 'idle');
+    film.classList.toggle('hold', !past && S.mode === 'idle' && !!S.copyOn);   // the scrim deepens with the words, on the edge they sit on (data-pos, set with them)
     film.classList.toggle('at0', S.mode === 'idle' && S.at === 0);
   }
 
@@ -770,7 +770,7 @@
     const minF = wide ? (innerHeight < 800 ? .64 : .78) : .84;
     copies.forEach((c) => {
       if (c.classList.contains('hero')) return;
-      c.style.removeProperty('--u'); c.classList.remove('row', 'nodesc', 'nocards', 'nocredit');
+      c.style.removeProperty('--u'); c.classList.remove('onerow', 'nodesc', 'nocards', 'nocredit');
       const low = wide ? c.dataset.dpos === 'bottom' : c.dataset.pos === 'bottom';
       const key = !wide && c.dataset.i === String(LAST) && film.querySelector('.finwall .key');
       const ceil = key ? key.getBoundingClientRect().bottom - ft : headBot;
@@ -786,7 +786,7 @@
         return over() <= 0;
       };
       if (shrink()) return;
-      if (c.querySelector('.cards')) { c.style.removeProperty('--u'); c.classList.add('row'); if (shrink()) return; }
+      if (c.querySelector('.cards')) { c.style.removeProperty('--u'); c.classList.add('onerow'); if (shrink()) return; }
       if (c.querySelector('.credit')) { c.style.removeProperty('--u'); c.classList.add('nocredit'); if (shrink()) return; }   // 집 on a small phone: the fine print goes first
       c.classList.add('nodesc'); if (shrink()) return;
       // a short landscape phone (about 390 px tall): smaller still, and last the thumbnails give way to the words

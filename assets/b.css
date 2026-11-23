@@ -1,0 +1,174 @@
+/* B안 home (index-b.html): five chapters, one photograph each, read left to right.
+   Hierarchy: at any moment one photograph is the main one — sharp, full colour — and the one beside it is the sub
+   one: out of focus and a little paler (a small blurred copy laid over it, see tools/b_media.py). They trade places
+   while the next slides over and dissolves in along an eased edge (the "easing gradients" technique, CSS-Tricks ·
+   Andreas Larsen), so the eye finds no seam. A chapter is at least a screen plus the dissolve wide, so never more
+   than two photographs share the screen. The words sit on an out-of-focus patch of their own photograph under a
+   thin mist, beside its subject (left or right, alternating). The client's teal gradient is an accent only. */
+:root{--pp:246,248,247; --dk:3,27,31}   /* on the root: the masthead band and the rail sit outside .hbook */
+.hbook,.b-rail{--ink:#062e33}   /* site.css has its own --ink (a near-black); B's ink is the deep teal */
+.hbook{--fd:20vw; position:relative}
+.track{background:#0b1d21; color:var(--ink)}
+
+/* ---- words ---- */
+/* site.css has a .note of its own (the A home's film captions: no wrapping, no clicks, a blurred pool behind, a
+   delayed fade): none of that belongs here */
+.hbook .note{white-space:normal; pointer-events:auto; isolation:auto; opacity:1; transition:none; font:400 16px/1.6 var(--sans); color:var(--ink)}
+.hbook .note::before{content:none}
+.hbook .note h2 b{display:inline; font:inherit; font-weight:800}
+html.hb .sc:last-child .note h2{font-size:max(28px, calc(var(--u)*36))}
+.note .kick,.cover .kick{margin:0 0 14px; font:700 max(12px, calc(var(--u)*12.5))/1.3 var(--sans); letter-spacing:.16em; text-transform:uppercase; color:var(--key)}
+.note h2{margin:0; font:300 max(32px, calc(var(--u)*46))/1.14 var(--display); letter-spacing:-.03em; text-wrap:balance}
+.note h2 b{font-weight:800; color:var(--key)}
+.note h2 .n{display:block; margin-bottom:8px; font:200 max(40px, calc(var(--u)*58))/1 var(--display); color:var(--key)}
+.note .lede{margin:calc(var(--u)*16) 0 0; font:700 max(18px, calc(var(--u)*19.5))/1.5 var(--display); letter-spacing:-.02em}
+.note .desc{margin:calc(var(--u)*10) 0 0; font:400 max(15px, calc(var(--u)*15.5))/1.8 var(--sans); font-style:normal; letter-spacing:0; color:rgba(6,46,51,.86)}
+.note .btns{margin-top:calc(var(--u)*22)}
+.note .lnk{display:inline-block; margin-top:12px; color:inherit}
+.note .nw{white-space:nowrap}
+.count{margin:calc(var(--u)*22) 0 0; display:flex; flex-direction:column; gap:4px}
+.count small{font:700 max(13px, calc(var(--u)*13.5))/1.3 var(--display); opacity:.82}
+.count b{width:max-content; font:800 max(40px, calc(var(--u)*54))/1.05 var(--display); letter-spacing:-.04em; font-variant-numeric:tabular-nums;
+  color:#054763; background:linear-gradient(90deg, #054763 0%, #2a7b9b 55%, #61b5b8 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+.news{list-style:none; margin:16px 0 0; padding:0; border-top:1px solid currentColor; border-color:rgba(255,255,255,.22)}
+.news a{display:flex; justify-content:space-between; gap:14px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.22); color:inherit; text-decoration:none}
+.news span{font:700 14.5px/1.4 var(--display)} .news small{flex:none; font-size:12px; opacity:.7; font-variant-numeric:tabular-nums}
+.news a:hover span{color:#a8e0de}
+/* a dark picture keeps its night: white words on a dark mist */
+.note.dark{color:#fff}
+.note.dark .kick,.note.dark h2 .n,.note.dark h2 b{color:#a8e0de}
+.note.dark .desc{color:rgba(255,255,255,.88)}
+.note.dark .count b{color:#a8e0de; background:linear-gradient(90deg, #ffffff 0%, #a8e0de 60%, #61b5b8 100%); -webkit-background-clip:text; background-clip:text}
+
+/* ---- the strip ---- */
+.sc{position:relative}
+.sc .m{position:absolute; inset:0; margin:0; overflow:hidden; background:#0b1d21}
+.ph{position:absolute; inset:0}
+.ph > img,.ph > video{position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; object-position:var(--op, 50% 50%)}
+.ph .soft{pointer-events:none; -webkit-user-select:none; user-select:none}
+
+html.hb .stage{position:sticky; top:0; height:100vh; overflow:hidden}
+html.hb .track{display:flex; height:100%; width:max-content; will-change:transform}
+/* a chapter: the photograph at full height, and never narrower than a screen plus both dissolves' halves */
+html.hb .sc{flex:none; height:100%; width:max(calc(100vh * var(--arn)), calc(100vw + var(--fd) + 6vw))}
+html.hb .ph{transform:scale(1.08); will-change:transform}   /* room for the drift */
+html.hb .cover .ph{transform:none}
+/* main ↔ sub: the soft copy covers the photograph as it stops being the main one (b.js sets --f, 1 = main) */
+html.hb .ph .g{opacity:calc(1 - var(--f, 0)); will-change:opacity}
+/* each picture slides over the one before; its left edge dissolves in along an eased ramp */
+html.hb .sc + .sc{margin-left:calc(var(--fd) * -1)}
+html.hb .sc + .sc .m{
+  -webkit-mask-image:linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.013) 8.1%, rgba(0,0,0,.049) 15.5%, rgba(0,0,0,.104) 22.5%, rgba(0,0,0,.175) 29%, rgba(0,0,0,.259) 35.2%, rgba(0,0,0,.352) 41.2%, rgba(0,0,0,.45) 47.1%, rgba(0,0,0,.55) 52.9%, rgba(0,0,0,.648) 58.8%, rgba(0,0,0,.741) 64.8%, rgba(0,0,0,.825) 71%, rgba(0,0,0,.896) 77.5%, rgba(0,0,0,.951) 84.5%, rgba(0,0,0,.987) 91.9%, #000 100%), linear-gradient(#000, #000);
+  mask-image:linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.013) 8.1%, rgba(0,0,0,.049) 15.5%, rgba(0,0,0,.104) 22.5%, rgba(0,0,0,.175) 29%, rgba(0,0,0,.259) 35.2%, rgba(0,0,0,.352) 41.2%, rgba(0,0,0,.45) 47.1%, rgba(0,0,0,.55) 52.9%, rgba(0,0,0,.648) 58.8%, rgba(0,0,0,.741) 64.8%, rgba(0,0,0,.825) 71%, rgba(0,0,0,.896) 77.5%, rgba(0,0,0,.951) 84.5%, rgba(0,0,0,.987) 91.9%, #000 100%), linear-gradient(#000, #000);
+  -webkit-mask-size:var(--fd) 100%, calc(100% - var(--fd) + 1px) 100%; mask-size:var(--fd) 100%, calc(100% - var(--fd) + 1px) 100%;
+  -webkit-mask-position:0 0, calc(var(--fd) - 1px) 0; mask-position:0 0, calc(var(--fd) - 1px) 0;
+  -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat}
+
+/* the words on their picture: a glass card — the cover bar's glass, hairline and shadow — placed beside the subject
+   (--in from the chapter's left or right edge, --cw wide; see home_b in build.py). The glass blurs whatever is behind
+   it, so the words read on any photograph, and its clean edge reads as placed, not as a smudge. */
+.note{position:absolute; z-index:3; top:calc(50% + 12px); left:var(--in, 24vw); width:clamp(330px, var(--cw, 30vw), 470px); translate:0 -50%;
+  padding:calc(var(--u)*32) calc(var(--u)*34) calc(var(--u)*30);
+  background:rgba(255,255,255,.64); -webkit-backdrop-filter:blur(26px) saturate(150%); backdrop-filter:blur(26px) saturate(150%);
+  border:1px solid rgba(255,255,255,.82); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 40px 80px -40px rgba(3,36,50,.5)}
+.sc.r .note{left:auto; right:var(--in, 24vw)}
+.note.dark{background:rgba(3,27,31,.5); border-color:rgba(255,255,255,.14); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 40px 80px -40px rgba(0,0,0,.6)}
+.note h2{font-size:max(30px, calc(var(--u)*40))}
+.note h2 .n{font-size:max(38px, calc(var(--u)*50))}
+.note .btns{display:flex; flex-wrap:wrap; gap:8px}
+.note .btns .btn{margin:0}
+html.hb .note{opacity:var(--nv, 0); translate:calc((1 - var(--nv, 0)) * 18px) -50%}
+html.hb .sc.r .note{translate:calc((1 - var(--nv, 0)) * -18px) -50%}
+
+/* cover: the film full screen, the title on a light mist, the give bar below */
+.cover{color:var(--ink)}
+html.hb .cover{width:100vw}
+.cover .mist{position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(90deg, rgba(var(--pp),.9) 0%, rgba(var(--pp),.82) 16%, rgba(var(--pp),.62) 28%, rgba(var(--pp),.38) 38%, rgba(var(--pp),.17) 47%, rgba(var(--pp),.05) 54%, rgba(var(--pp),0) 60%)}
+.cover .tx{position:absolute; z-index:2; left:var(--lx); bottom:calc(var(--u)*170); width:calc(var(--u)*620)}
+html.hb .cover .tx,html.hb .cover .mist{opacity:var(--nv, 1)}
+.cover h1{margin:0; font:700 max(28px, calc(var(--u)*34))/1.4 var(--display); letter-spacing:-.025em; text-wrap:balance}
+.cover h1 b{color:var(--key)}
+.turn{display:flex; align-items:center; gap:12px; margin:calc(var(--u)*20) 0 0; font-size:13px; color:rgba(6,46,51,.7)}
+.turn i{position:relative; width:44px; height:1px; background:currentColor; overflow:hidden}
+.turn i::after{content:""; position:absolute; inset:0; background:var(--key); animation:turn 2.4s var(--ease) infinite}
+@keyframes turn{from{translate:-100% 0} to{translate:100% 0}}
+
+/* the masthead reads over any picture: a light band that thins out, eased */
+html.hb .top::before{content:""; position:absolute; inset:0 0 -96px; z-index:-1; pointer-events:none; opacity:1;
+  background:linear-gradient(180deg, rgba(var(--pp),.92) 0%, rgba(var(--pp),.88) 22%, rgba(var(--pp),.78) 40%, rgba(var(--pp),.62) 54%, rgba(var(--pp),.44) 66%, rgba(var(--pp),.27) 77%, rgba(var(--pp),.13) 87%, rgba(var(--pp),.04) 95%, rgba(var(--pp),0) 100%)}
+
+/* the end: the last page stays where it is and the footer slides up over it like a sheet (no jolt) */
+html.hb .stage::after{content:""; position:absolute; inset:0; z-index:8; pointer-events:none; background:#031b1f; opacity:calc(var(--cover, 0) * .38)}
+html.hb .foot{z-index:9; box-shadow:0 -40px 80px -40px rgba(3,27,31,.5)}
+
+/* ---- the rail: frosted, fading out at both ends, so it sits on the picture instead of boxing it ---- */
+.b-rail{position:fixed; z-index:30; left:calc(var(--lx) - 40px); bottom:calc(var(--u)*18); width:calc(var(--u)*420 + 80px); height:54px; transition:opacity .4s}
+.b-rail::before{content:""; position:absolute; inset:0; background:rgba(var(--pp),.84); -webkit-backdrop-filter:blur(16px) saturate(140%); backdrop-filter:blur(16px) saturate(140%);
+  -webkit-mask-image:linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%); mask-image:linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%)}
+.b-rail .in{position:absolute; left:40px; right:40px; top:0; bottom:0; color:var(--ink)}
+.b-rail.off{opacity:0; pointer-events:none}
+.b-rail .line,.b-rail .fill{position:absolute; left:0; top:17px; height:1px; width:100%; background:currentColor; opacity:.22}
+.b-rail .fill{width:0; opacity:1; height:2px; top:16.5px; background:linear-gradient(90deg, #054763, #2a7b9b, #61b5b8)}
+.b-rail ol{list-style:none; margin:0; padding:0}
+.b-rail li{position:absolute; top:10px; translate:-50% 0}
+.b-rail a{display:flex; flex-direction:column; align-items:center; gap:6px; color:inherit; text-decoration:none; font:600 12px/1 var(--display)}
+.b-rail a::before{content:""; width:1px; height:9px; margin-top:3px; background:currentColor; opacity:.5}
+.b-rail a:hover{color:var(--key)}
+.b-rail .cam{position:absolute; left:0; top:13px; width:9px; height:9px; border-radius:50%; translate:-50% 0; background:#054763; box-shadow:0 0 0 4px rgba(42,123,155,.18)}
+
+/* ---- the give bar: square, light — glass, hairlines, one strong button ---- */
+.qgive{position:absolute; z-index:5; left:50%; bottom:calc(var(--u)*34); translate:-50% 0; width:min(1100px, calc(100vw - var(--lx) - var(--rx)));
+  display:grid; grid-template-columns:auto auto minmax(150px,1fr) auto auto; align-items:stretch; padding:8px;
+  background:rgba(255,255,255,.66); -webkit-backdrop-filter:blur(22px) saturate(160%); backdrop-filter:blur(22px) saturate(160%);
+  border:1px solid rgba(255,255,255,.85); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 30px 70px -30px rgba(3,36,50,.45); color:var(--ink)}
+.qgive > *{display:flex; align-items:center; padding:0 18px}
+.qgive > * + *{border-left:1px solid rgba(6,46,51,.12)}
+.qg-t{gap:12px; margin:0}
+.qg-t i{width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg, #61b5b8, #054763); box-shadow:0 0 0 4px rgba(97,181,184,.22)}
+.qg-t b{display:block; font:800 14.5px/1.35 var(--display); letter-spacing:-.01em}
+.qg-t small{display:block; margin-top:2px; font-size:12px; color:rgba(6,46,51,.62)}
+.qgive .seg{gap:4px}
+.qgive .seg [role="tab"]{position:relative; padding:10px 6px; border:0; background:none; color:rgba(6,46,51,.55); font:700 14px/1 var(--display); cursor:pointer; transition:color .2s}
+.qgive .seg [role="tab"]::after{content:""; position:absolute; left:6px; right:6px; bottom:2px; height:2px; background:var(--key); transform:scaleX(0); transition:transform .3s var(--ease)}
+.qgive .seg [aria-selected="true"]{color:var(--ink)}
+.qgive .seg [aria-selected="true"]::after{transform:scaleX(1)}
+.qgive .amount{flex-direction:column; align-items:stretch; justify-content:center; gap:2px; margin:0}
+.qgive .amount .lab{font-size:11px; font-weight:700; letter-spacing:.04em; color:rgba(6,46,51,.55)}
+.qgive .field{display:flex; align-items:baseline; gap:6px; padding:0; border:0; background:none}
+.qgive .field input{flex:1; min-width:0; border:0; background:none; outline:0; padding:0; text-align:left; font:800 24px/1.15 var(--display); color:var(--key); font-variant-numeric:tabular-nums}
+.qgive .field .won{font:700 14px/1 var(--display)}
+.qgive .amount:focus-within .lab{color:var(--key)}
+.qgive .chips.amts{gap:2px; padding:0 14px; flex-wrap:nowrap}
+.qgive .field input{min-width:5.4ch}
+.qgive .chips.amts .chip{padding:8px 9px; border:0; background:none; color:rgba(6,46,51,.6); font:700 12.5px/1 var(--display); letter-spacing:0}
+.qgive .chips.amts .chip:hover{color:var(--key)}
+.qgive .chips.amts .chip[aria-pressed="true"]{background:var(--key); color:#fff}
+.qgive .btn.go{gap:14px; min-height:54px; margin:0; padding:0 26px; border:0; background:linear-gradient(100deg, #2a7b9b 0%, #054763 100%); color:#fff; font:800 15px/1 var(--display); letter-spacing:.01em}
+.qgive .btn.go::after{content:""; width:18px; height:10px; background:currentColor; -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 10'%3E%3Cpath d='M0 5h16M12 1l4 4-4 4' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 10'%3E%3Cpath d='M0 5h16M12 1l4 4-4 4' fill='none' stroke='black' stroke-width='1.6'/%3E%3C/svg%3E") center/contain no-repeat; transition:translate .3s var(--ease)}
+.qgive .btn.go:hover::after{translate:4px 0}
+.qgive .btn.go:hover{background:linear-gradient(100deg, #3489ab 0%, #0a5677 100%)}
+.qgive > .btn.go{border-left:0}
+html.hb .qgive{transition:opacity .25s linear}
+
+/* ---- phones, short windows, reduced motion: the photographs one under another, words between ---- */
+html:not(.hb) .track{background:#f6f8f7}
+html:not(.hb) .sc{display:flex; flex-direction:column}
+html:not(.hb) .sc .m{position:relative; inset:auto; aspect-ratio:var(--ar)}
+html:not(.hb) .ph .soft{display:none}
+html:not(.hb) .cover{min-height:100svh}
+html:not(.hb) .cover .m{position:absolute; inset:0; aspect-ratio:auto}
+html:not(.hb) .cover .tx{position:relative; left:auto; bottom:auto; width:auto; padding:58vh 16px 24px}
+html:not(.hb) .sc .note{position:relative; top:auto; left:auto; right:auto; width:auto; translate:none; padding:36px 16px 44px; color:var(--ink); background:#f6f8f7;
+  border:0; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none}
+html:not(.hb) .note.dark{color:var(--ink)}
+html:not(.hb) .note.dark .kick,html:not(.hb) .note.dark h2 .n{color:var(--key)}
+html:not(.hb) .note.dark .desc{color:rgba(6,46,51,.86)}
+html:not(.hb) .note.dark .count b{color:#054763; background:linear-gradient(90deg, #054763 0%, #2a7b9b 55%, #61b5b8 100%); -webkit-background-clip:text; background-clip:text}
+html:not(.hb) .news,html:not(.hb) .news a{border-color:var(--ln)}
+html:not(.hb) .b-rail{display:none}
+html:not(.hb) .qgive{position:relative; left:auto; bottom:auto; translate:none; width:calc(100% - 32px); margin:0 16px 24px; grid-template-columns:1fr; padding:6px}
+html:not(.hb) .qgive > *{padding:12px}
+html:not(.hb) .qgive > * + *{border-left:0; border-top:1px solid rgba(6,46,51,.12)}
+html:not(.hb) .qgive .chips.amts{flex-wrap:wrap}
+html:not(.hb) .qgive .btn.go{justify-content:center}

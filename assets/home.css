@@ -1,0 +1,202 @@
+/* Home — one long take from a bright afternoon, through the fire, back to the light of home.
+   html.film : fixed stops cross-fade / scrub with scroll (desktop, motion allowed)
+   html.stack: the same HTML stacked top to bottom (phones, reduced motion, no JS) */
+
+/* scrims: one hue in steps. Night falls from near-black teal at the edge through deep teal and act teal to the
+   logo teal before it clears, so the fade reads as light falling off rather than a grey film over the picture.
+   Day is the same idea in the morning: snow → mist → pale teal → clear. */
+html{--u0:var(--u);
+  --scrim-night:
+    linear-gradient(90deg, rgba(3,27,31,.86) 0%, rgba(6,46,51,.72) 22%, rgba(10,63,69,.48) 36%, rgba(0,81,91,.18) 48%, rgba(27,94,100,0) 60%),
+    linear-gradient(180deg, rgba(3,27,31,.58) 0%, rgba(6,46,51,.2) 9%, rgba(6,46,51,0) 18%),
+    linear-gradient(0deg, rgba(3,27,31,.55) 0%, rgba(6,46,51,0) 16%);
+  --scrim-day:
+    linear-gradient(90deg, rgba(246,248,247,.93) 0%, rgba(238,243,244,.84) 26%, rgba(219,232,231,.5) 41%, rgba(219,232,231,.14) 52%, rgba(219,232,231,0) 62%),
+    linear-gradient(180deg, rgba(246,248,247,.7) 0%, rgba(246,248,247,0) 17%),
+    linear-gradient(0deg, rgba(246,248,247,.6) 0%, rgba(246,248,247,0) 15%);
+  /* multiplied over the night picture: shadows lean teal instead of going grey; white = no change */
+  --grade-night:linear-gradient(90deg, #5f9192 0%, #9ec2c1 30%, #dcebea 48%, #fff 62%);
+}
+.stop{position:relative; isolation:isolate; overflow:hidden; background:rgb(var(--sc))}
+.stop .bg{width:100%; height:auto; aspect-ratio:16/9; object-fit:cover}
+.stop .grain{z-index:1}
+.stop::before{content:""; position:absolute; inset:0; z-index:2; pointer-events:none; background:var(--scrim-night)}
+.stop.t-day::before{background:var(--scrim-day)}
+.stop .ov{position:relative; z-index:10}
+.stop .note{display:none}
+.hero h1{margin:0; font:700 max(28px, calc(var(--u)*34))/1.36 var(--display); letter-spacing:-.035em; text-wrap:balance; color:var(--fg)}
+.hero h1 b{font-weight:800; color:var(--key)}
+.cue{display:flex; align-items:center; gap:12px; margin:0; font-size:max(12px, calc(var(--u)*12)); letter-spacing:.14em; text-transform:uppercase; color:var(--fg-2)}
+.cue i{position:relative; display:block; width:1px; height:calc(var(--u)*34); min-height:26px; background:var(--ln-2); overflow:hidden}
+.cue i::after{content:""; position:absolute; left:0; top:-40%; width:1px; height:40%; background:var(--accent); animation:drip 2.2s var(--ease) infinite}
+@keyframes drip{0%{top:-40%} 70%,100%{top:100%}}
+
+/* ---- finale: one square = one rescued child; scrolling lights them, and the ones who found a family draw WE ---- */
+.fin{background:var(--mist)}
+.mosaic ul{display:grid; grid-template-columns:repeat(var(--cols), minmax(0,1fr)); grid-template-rows:repeat(var(--rows), minmax(0,1fr));
+  gap:2px; margin:0; padding:0; list-style:none}
+.mosaic li{position:relative; overflow:hidden; background:var(--teal-100)}
+.mosaic img{width:100%; height:100%; object-fit:cover; opacity:.2; filter:grayscale(1); transition:opacity .9s var(--ease), filter .9s var(--ease)}
+.mosaic li.on img{opacity:.92; filter:none}
+.mosaic li.w.on img{opacity:1}
+/* formed: the rest go quiet, and the family settles into act teal — WE, drawn in the brand's one colour,
+   each square still a child's photo underneath (a duotone: grey photo × teal) */
+.mosaic li::after{content:""; position:absolute; inset:0; background:var(--key); mix-blend-mode:multiply; opacity:0; transition:opacity 1.2s var(--ease)}
+.mosaic.formed li:not(.w) img{opacity:.09}
+.mosaic.formed li.w img{filter:grayscale(1) brightness(1.12) contrast(1.05)}
+.mosaic.formed li.w::after{opacity:1}
+.glow{position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0; transition:opacity 1.6s var(--ease);
+  background:radial-gradient(40% 56% at 69% 46%, rgba(233,180,124,.2), rgba(233,180,124,0) 72%)}
+.mosaic.formed + .glow{opacity:1}
+.key{display:flex; align-items:center; gap:10px; margin:0; padding:7px 12px; background:rgba(246,248,247,.86);
+  font-size:max(12px, calc(var(--u)*12)); letter-spacing:.02em; color:var(--fg-2); white-space:nowrap}
+.key i{width:max(9px, calc(var(--u)*9)); height:max(9px, calc(var(--u)*9)); background:var(--teal-300)}
+.key span{opacity:.5}
+.key b{font:800 max(12px, calc(var(--u)*12))/1 var(--display); letter-spacing:.08em; color:var(--fg)}
+.fin h2{margin:calc(var(--u)*16) 0 0; font:800 max(30px, calc(var(--u)*44))/1.2 var(--display); letter-spacing:-.03em; text-wrap:balance}
+.fin h2 .we{font-weight:900; color:var(--key)}
+.credit{margin:calc(var(--u)*26) 0 0; padding-top:calc(var(--u)*12); border-top:1px solid var(--ln); font-size:max(12.5px, calc(var(--u)*12.5)); color:var(--fg-2); font-variant-numeric:tabular-nums; line-height:1.7}
+.fin .legal{display:none; flex-wrap:wrap; gap:2px calc(var(--u)*14); margin-top:calc(var(--u)*6); font-size:max(12px, calc(var(--u)*12)); line-height:1.7}
+.fin .legal a{color:var(--fg-2); text-decoration:none} .fin .legal a:hover{color:var(--fg); text-decoration:underline}
+html.film .fin .legal{display:flex}
+
+/* the road (rail) */
+.rail{position:fixed; z-index:20; left:16px; right:16px; bottom:0; height:54px; padding-bottom:env(safe-area-inset-bottom); color:var(--fg); transition:opacity .5s var(--ease), color .7s var(--ease)}
+.rail::before{content:""; position:absolute; inset:-18px -16px 0; z-index:-1; background:linear-gradient(0deg, rgba(var(--sc),.96) 70%, rgba(var(--sc),0))}
+.rail .line{position:absolute; left:0; right:0; top:22px; height:1px; background:var(--ln)}
+.rail .fill{position:absolute; left:0; top:22px; height:1px; width:0; background:var(--fg-2)}
+.rail ol{list-style:none; margin:0; padding:0}
+.rail a{position:absolute; top:12px; width:44px; height:40px; margin-left:-22px; text-decoration:none; color:inherit; outline-offset:-4px}
+.rail a::before{content:""; position:absolute; left:50%; top:5px; width:1px; height:9px; background:var(--fg-3)}
+.rail a span{position:absolute; top:17px; left:50%; translate:-50% 0; font-size:max(11.5px, calc(var(--u)*12)); color:var(--fg-2); letter-spacing:.06em; white-space:nowrap; transition:color .16s}
+.rail a.cur::before{background:var(--accent)}
+.rail a.cur span{color:var(--accent)}
+.rail a:hover span{color:var(--fg)}
+.rail .cam{position:absolute; left:0; top:14px; width:2px; height:17px; margin-left:-1px; background:var(--lamp); box-shadow:0 0 8px rgba(233,180,124,.5); pointer-events:none}
+.rail.t-day .cam{background:var(--teal-700); box-shadow:none}
+.rail .next{position:absolute; left:0; bottom:100%; margin:0 0 8px; display:flex; gap:10px; align-items:baseline; font-size:max(12px, calc(var(--u)*12)); letter-spacing:.14em; color:var(--fg-2); opacity:0; transition:opacity .4s var(--ease); white-space:nowrap}
+.rail .next b{font:700 max(14px, calc(var(--u)*15))/1 var(--display); letter-spacing:0; color:var(--fg)}
+.rail .next .k{color:var(--accent)}
+.veil{position:fixed; inset:0; z-index:25; background:var(--teal-950); opacity:0; pointer-events:none; transition:opacity .6s cubic-bezier(.3,0,.2,1)}
+html.cut .veil{opacity:1; transition:opacity .24s cubic-bezier(.5,0,.75,0)}
+
+/* ================= film ================= */
+html.film body{background:var(--night)}
+html.film .road{position:relative}
+html.film .stop{position:fixed; inset:0; opacity:0; visibility:hidden; pointer-events:none}
+html.film .stop.vis{visibility:visible}
+html.film .stop .bg{position:absolute; inset:0; height:100%; aspect-ratio:auto; transform:scale(var(--k,1)); transform-origin:62% 50%; will-change:transform}
+html.film .stop::before{opacity:.45; transition:opacity .7s var(--ease)}
+html.film .stop.on::before{opacity:1}
+html.film .stop .ov{position:absolute; left:var(--lx); top:calc(var(--u0,var(--u))*80); width:calc(var(--u0,var(--u))*446); opacity:0; transition:opacity .38s var(--ease)}
+html.film .stop.on .ov{opacity:1; pointer-events:auto}
+/* 02 · 04: the number the station stands for, at the bottom right of the frame, counted up as you arrive */
+.stop .count{position:relative; z-index:10; display:flex; flex-direction:column; gap:calc(var(--u)*6); margin:0}
+.stop .count small{font:800 max(13px, calc(var(--u)*14))/1.3 var(--display); letter-spacing:-.01em}
+.stop .count b{font:900 max(44px, calc(var(--u)*68))/.95 var(--display); letter-spacing:-.045em; font-variant-numeric:tabular-nums; color:var(--key)}
+.stop.t-night .count b{color:#80d0c7}
+.stop.t-night .count{text-shadow:0 2px 28px rgba(3,27,31,.55)}
+html.film .stop .count{position:absolute; right:var(--rx); bottom:calc(var(--u)*64); align-items:flex-end; text-align:right; opacity:0; transition:opacity .5s var(--ease)}
+html.film .stop.on .count{opacity:1}
+/* the words under a station's thumbnails stay small, so the column reads as one block */
+html.film .stop .cards .nm{font-size:max(12.5px, calc(var(--u)*12.5)); line-height:1.35}
+html.film .stop .cards .t,html.film .stop .cards .sub.k{font-size:max(11.5px, calc(var(--u)*11))}
+html.film .stop .count.in{position:static; margin-top:calc(var(--u)*24); align-items:flex-start; text-align:left; opacity:1; transition:none}
+html.film .stop.on .ov > *{animation:rise .7s var(--ease) both}
+html.film .stop.on .ov > :nth-child(2){animation-delay:.04s} html.film .stop.on .ov > :nth-child(3){animation-delay:.08s}
+html.film .stop.on .ov > :nth-child(4){animation-delay:.12s} html.film .stop.on .ov > :nth-child(5){animation-delay:.16s}
+html.film .stop.on .ov > :nth-child(6){animation-delay:.2s} html.film .stop.on .ov > :nth-child(7){animation-delay:.26s}
+html.film .stop .note{display:block}
+html.film .stop.lit .note{opacity:1}
+html.film .stop .cards.scroll{overflow-y:auto; overscroll-behavior:contain; padding:2px 2px 28px; margin-left:-2px; margin-right:-2px;
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 28px), transparent); mask-image:linear-gradient(#000 calc(100% - 28px), transparent)}
+
+/* the hero is daylight: the lawn stays bright, a morning mist only where the words are */
+html.film .hero{opacity:1; visibility:visible}
+html.film .hero::before{background:
+  linear-gradient(90deg, rgba(246,248,247,.78) 0%, rgba(238,243,244,.56) 22%, rgba(238,243,244,.16) 38%, rgba(238,243,244,0) 48%),
+  linear-gradient(255deg, rgba(19,84,122,.5) 0%, rgba(31,127,140,.3) 22%, rgba(128,208,199,.12) 40%, rgba(128,208,199,0) 56%)}
+html.film .hero .ov{top:auto; bottom:calc(var(--u)*96); width:calc(var(--u)*600); opacity:var(--ho,1); pointer-events:auto}
+html.film .hero .ov > *{animation:rise .7s var(--ease) both}
+html.film .hero .cue{position:absolute; z-index:11; left:var(--lx); bottom:calc(var(--u)*26); opacity:var(--ho,1)}
+
+/* the finale fills the frame like every other station: 22×12 squares of 60 frame px, cover-fitted */
+html.film .fin .mosaic{position:absolute; z-index:0; left:50%; top:50%; --cv:max(100vw / 1280, 100vh / 720);
+  width:calc(var(--cv) * 1320); height:calc(var(--cv) * 720); translate:-50% -50%; transform:scale(var(--k,1)); transform-origin:69% 46%; will-change:transform}
+html.film .fin .mosaic ul{width:100%; height:100%}
+html.film .fin::before{background:
+  linear-gradient(90deg, rgba(246,248,247,.95) 0%, rgba(238,243,244,.88) 28%, rgba(219,232,231,.55) 37%, rgba(219,232,231,0) 44%),
+  linear-gradient(180deg, rgba(246,248,247,.7) 0%, rgba(246,248,247,0) 15%)}
+html.film .fin .ov{top:auto; bottom:calc(var(--u)*92); width:calc(var(--u)*470)}
+html.film .fin .key{position:absolute; z-index:10; right:var(--rx); bottom:calc(var(--u)*24); opacity:0; transition:opacity .8s var(--ease) .3s}
+html.film .fin.on .key{opacity:1}
+
+html.film .rail{left:var(--lx); right:auto; bottom:calc(var(--u)*18); width:calc(var(--u)*446); height:calc(var(--u)*34); padding:0}
+html.film .rail::before{display:none}
+html.film .rail .line,html.film .rail .fill{top:calc(var(--u)*12)}
+html.film .rail a{top:calc(var(--u)*4); height:calc(var(--u)*30)}
+html.film .rail a span{top:calc(var(--u)*15)}
+html.film .rail .cam{top:calc(var(--u)*4)}
+html.film.at-top .rail{opacity:0; pointer-events:none}
+html.film.moving .rail .next{opacity:1}
+html.film.wait .rail .cam{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+/* the road ends on the finale: no footer scrolls up over WE. Its legal links ride under the credit instead */
+html.film .home-foot{display:none}
+
+/* ---- the 3D take: one scrubbed canvas under the stations that stand on it (hero, beat, 01, 02) ----
+   The depth is the take's; the words stay a flat caption layer in front of the lens (no 3D on the UI).
+   The take carries the scrims for its stations: night (+ a teal grade multiplied in) on dark frames, mist on bright ones. */
+.take{display:none}
+html.film .take{display:block; position:fixed; inset:0; isolation:isolate; overflow:hidden; background:var(--night); visibility:hidden}
+html.film .take.vis{visibility:visible}
+html.film .take canvas{position:absolute; inset:0; width:100%; height:100%; transform-origin:62% 50%; will-change:transform}
+html.film .take .grain{z-index:1; opacity:.14; transition:opacity .7s var(--ease)}
+html.film.bright .take .grain{opacity:0}
+html.film .take .grade{position:absolute; inset:0; z-index:2; pointer-events:none; background:var(--grade-night); mix-blend-mode:multiply; opacity:0; transition:opacity .7s var(--ease)}
+html.film .take::before,html.film .take::after{content:""; position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0; transition:opacity .7s var(--ease)}
+html.film .take::before{background:var(--scrim-night)}
+html.film .take::after{background:var(--scrim-day)}
+html.film:not(.at-top):not(.bright) .take::before,html.film:not(.at-top):not(.bright) .take .grade{opacity:.5}
+html.film.vhold .take::before,html.film.vhold .take .grade{opacity:1}
+html.film.bright:not(.at-top) .take::after{opacity:.5}
+html.film .stop.vs{background:none}
+html.film .stop.vs .bg{filter:none; transform:none}
+html.film.take-on .stop.vs:not(.poster) .bg{visibility:hidden}   /* posters: before the take arrives, or while a cut waits for it */
+html.film .stop.vs:not(.hero)::before{display:none}
+html.film .hero.vs::before{opacity:var(--ho,1); transition:none}
+/* a day masthead (bright frames of the take, the photo stations after the fire, the finale) gets a light band behind it */
+html.film .top.t-day::before{opacity:.8}
+html.film.at-top .top.t-day::before{opacity:.45}   /* on the lawn the band stays faint */
+
+/* ================= stack ================= */
+html:not(.film) .stop{padding-bottom:calc(var(--u)*72)}
+html:not(.film) #s1 .bg{object-position:20% 50%}
+html:not(.film) .stop::before{inset:0 0 auto 0; height:auto; aspect-ratio:16/9; background:
+  linear-gradient(0deg, rgba(var(--sc),1) 0%, rgba(var(--sc),0) 42%), linear-gradient(180deg, rgba(var(--sc),.8) 0%, rgba(var(--sc),0) 26%)}
+html:not(.film) .stop .ov{padding:0 var(--lx); margin-top:calc(var(--u)*-36); max-width:calc(var(--u)*760 + 32px)}
+html:not(.film) .stop .count{padding:0 var(--lx); margin-top:calc(var(--u)*28)}
+html:not(.film) .stop .count.in{padding:0; margin-top:calc(var(--u)*24)}
+html:not(.film) .hero .cue{display:none}
+html:not(.film) .fin{padding-top:24px}
+html:not(.film) .fin::before{display:none}
+html:not(.film) .fin .mosaic{aspect-ratio:1320/720; margin:0 0 24px}
+html:not(.film) .fin .mosaic ul{height:100%; gap:1px}
+/* stacked, the wall is shown already formed */
+html:not(.film) .fin .mosaic li:not(.w) img{opacity:.12}
+html:not(.film) .fin .mosaic li.w img{opacity:1; filter:grayscale(1) brightness(1.12) contrast(1.05)}
+html:not(.film) .fin .mosaic li.w::after{opacity:1}
+html:not(.film) .fin .key{margin:0 var(--lx) 24px; display:inline-flex; white-space:normal}
+html:not(.film) .fin .ov{margin-top:0}
+html:not(.film) .stop .bg.hold{display:none}
+html:not(.film) body{padding-bottom:54px}
+html:not(.film) .home-foot{padding-bottom:96px}
+@media (max-width:1023px){
+  .hero h1{font-size:31px; line-height:1.3}
+  .fin h2{font-size:28px}
+  .stop .bg{aspect-ratio:4/3.6}
+  html:not(.film) .stop::before{aspect-ratio:4/3.6}
+  .hero .bg{aspect-ratio:3/4; object-position:52% 50%}
+  html:not(.film) .hero::before{aspect-ratio:3/4}
+  html:not(.film) .hero .ov{margin-top:-180px}
+}

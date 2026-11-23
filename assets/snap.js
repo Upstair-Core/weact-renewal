@@ -96,7 +96,7 @@
   function need(k, d) { if (V[k] && !V[k].ok[d]) attach(k, d, loadToken); }   // the film waits on it: start it now
   async function loadMedia() {
     const token = ++loadToken;
-    const order = [[0, 'f'], [1, 'f'], [0, 'r'], [2, 'f'], [1, 'r'], [3, 'f'], [2, 'r'], [3, 'r']].filter(([k]) => SEGS[k] && SEGS[k].kind === 'video');
+    const order = [[0, 'f'], [1, 'f'], [2, 'f'], [3, 'f'], [0, 'r'], [1, 'r'], [2, 'r'], [3, 'r']].filter(([k]) => SEGS[k] && SEGS[k].kind === 'video');
     for (const [k, d] of order) { if (token !== loadToken) return; await attach(k, d, token); }
   }
 
@@ -106,7 +106,7 @@
     at: 0, mode: 'idle', k: -1, dir: 0, t: 0, rate: 1, goal: null, origin: 0, target: 0,
     active: null, under: null, first: false, seeking: false, swapping: false, swapToken: 0,
     waitLoad: false, fade: false, t0: 0, lastT: -1, lastMove: 0, arrived: 0, copyOn: 0,
-    stepped: false, releasing: false, away: false, grabT: 0, resume: null, slowSeeks: 0, ease: null,
+    stepped: false, releasing: false, away: false, grabT: 0, resume: null, slowSeeks: 0, ease: null, sp: false,
   };
   const alpha = stills.map((_, i) => (i === 0 ? 1 : 0));
 
@@ -147,18 +147,30 @@
     S.mode = 'play'; S.k = k; S.dir = dir;
     S.origin = dir > 0 ? k : k + 1; S.target = dir > 0 ? k + 1 : k;
     S.t = dir > 0 ? 0 : seg.dur;
-    S.first = false; S.seeking = false; S.swapping = false; S.waitLoad = false;
+    S.first = false; S.seeking = false; S.swapping = false; S.waitLoad = false; S.sp = false;
     S.t0 = now(); S.lastMove = now(); S.lastT = -1;
     S.rate = farGoal() ? 2.5 : (dir > 0 ? 1 : 1.5);       // keys and milestones keep the plain pace
     S.ease = null;
     S.fade = reduce.matches;
     if (seg.kind === 'video' && !S.fade) {
       const d = dir > 0 ? 'f' : 'r';
-      if (V[k].ok[d]) begin(V[k][d], 0.5 / FPS); else { S.waitLoad = true; need(k, d); }
+      if (V[k].ok[d]) begin(V[k][d], 0.5 / FPS);
+      else if (d === 'r' && V[k].ok.f) seekPlay(V[k].f);   // the way back not in yet: step back through the forward file
+      else { S.waitLoad = true; need(k, d); }
     }
     updateUI(); kick();
   }
 
+  // Backward without its reverse file: hold the forward file and let the pump seek it back frame by frame at the play pace.
+  function seekPlay(v) {
+    S.sp = true; S.waitLoad = false;
+    if (S.active && S.active !== v) S.under = S.active;
+    S.active = v; v.style.zIndex = '1';
+    try { v.pause(); } catch (e) {}
+    S.first = v.readyState >= 2 && !v.seeking && Math.abs(v.currentTime - frameTime(v, S.k, S.t)) < 0.5 / FPS;
+    PUMP.busy = false; PUMP.v = null; S.lastMove = now();
+    kick();
+  }
   function begin(v, at) {
     S.active = v; S.first = false; S.lastMove = now(); S.lastT = -1;
     v.playbackRate = S.rate;
@@ -186,6 +198,10 @@
     S.rate = farGoal() ? 2.5 : (S.dir > 0 ? 1 : 1.5); S.ease = null;
     updateUI(); kick();
     if (seg.kind !== 'video' || S.fade) return;           // drawn stretches just run t backwards
+    if (S.sp) {                                            // was stepping back through the forward file: now just play it on
+      S.sp = false; const v = S.active;
+      if (v) { v.playbackRate = S.rate; playSafe(v); S.lastMove = now(); S.lastT = -1; return; }
+    }
     if (S.waitLoad) { arrive(true); return; }             // never left the stop
     const old = S.active;
     if (!old) { arrive(true); return; }
@@ -198,7 +214,9 @@
     const nv = V[S.k][d];
     if (!V[S.k].ok[d]) {                                    // turned back before that file arrived: hold and wait
       try { old.pause(); } catch (e) {}
-      S.t = activeT(); S.under = old; S.active = null; S.waitLoad = true; S.t0 = now(); need(S.k, d); updateUI(); return;
+      S.t = activeT();
+      if (d === 'r' && V[S.k].ok.f) { seekPlay(V[S.k].f); updateUI(); return; }   // step back through the forward file
+      S.under = old; S.active = null; S.waitLoad = true; S.t0 = now(); need(S.k, d); updateUI(); return;
     }
     try { old.pause(); } catch (e) {}
     const D = old.duration || seg.dur;
@@ -224,7 +242,7 @@
     PUMP.busy = false; PUMP.v = null;
     resetDrawn();
     S.at = S.target; S.mode = 'idle'; S.k = -1;
-    S.waitLoad = false; S.seeking = false; S.swapping = false; S.resume = null; S.ease = null;
+    S.waitLoad = false; S.seeking = false; S.swapping = false; S.resume = null; S.ease = null; S.sp = false;
     S.arrived = now(); S.copyOn = 0;
     if (jump) { S.active = null; S.under = null; }
     if (S.goal !== null && S.goal !== S.at) {
@@ -281,7 +299,7 @@
       else if (S.under && S.under.style.opacity !== '1') S.under = null;
     }
     pauseAll();
-    S.mode = 'scrub'; S.goal = null; S.dir = 0; S.grabT = S.t; S.stepped = true; S.ease = null;
+    S.sp = false; S.mode = 'scrub'; S.goal = null; S.dir = 0; S.grabT = S.t; S.stepped = true; S.ease = null;
     S.seeking = false; S.waitLoad = false; S.fade = reduce.matches;
     PUMP.busy = false; PUMP.v = null;
     const seg = SEGS[S.k], p = V[S.k];
@@ -325,7 +343,8 @@
     updateUI(); kick();
     if (seg.kind !== 'video' || S.fade) return;
     const d = dir > 0 ? 'f' : 'r', p = V[k];
-    if (!p || !p.ok[d]) {                                   // the way back has not arrived: hold this frame and wait
+    if (!p || !p.ok[d]) {                                   // the way back has not arrived: step back through the forward file
+      if (d === 'r' && p && p.ok.f) { seekPlay(p.f); updateUI(); return; }
       if (S.active) S.under = S.active;
       S.active = null; S.waitLoad = true; S.t0 = now(); need(k, d); updateUI(); kick(); return;
     }
@@ -336,7 +355,7 @@
   }
   // One seek in flight; when it lands the next frame asks for the newest wanted time.
   function pump(tn) {
-    if (S.mode !== 'scrub') return false;
+    if (S.mode !== 'scrub' && !(S.mode === 'play' && S.sp)) return false;
     const v = S.active;
     if (!v) return false;
     if (v.readyState < 1) return true;
@@ -353,8 +372,8 @@
   function onSeeked(v) {
     if (PUMP.v !== v || !PUMP.busy) return;
     PUMP.busy = false;
-    if (S.mode === 'scrub' && S.active === v && !S.first) {
-      requestAnimationFrame(() => { if (S.mode === 'scrub' && S.active === v) { S.first = true; kick(); } });
+    if ((S.mode === 'scrub' || S.sp) && S.active === v && !S.first) {
+      requestAnimationFrame(() => { if ((S.mode === 'scrub' || S.sp) && S.active === v) { S.first = true; kick(); } });
     }
     kick();
   }
@@ -599,6 +618,11 @@
       const speed = S.fade ? seg.dur / 0.7 : S.rate;
       S.t += dt * speed * S.dir;
       if ((S.dir > 0 && S.t >= seg.dur) || (S.dir < 0 && S.t <= 0)) { S.t = S.dir > 0 ? seg.dur : 0; arrive(false); }
+      return true;
+    }
+    if (S.sp) {                                            // stepping back through the forward file
+      S.t = Math.max(0, S.t - dt * S.rate); S.lastMove = tn;
+      if (S.t <= 0) arrive(false);
       return true;
     }
     const d = S.dir > 0 ? 'f' : 'r';

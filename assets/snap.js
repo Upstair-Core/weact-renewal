@@ -821,7 +821,12 @@
   let atlas = null, atlasGray = null, weGray = null;
   const wallC = document.createElement('canvas');
   let wctx = null, wDpr = 1, wW = 0, wH = 0, gap = 2, formed = false, teal = 0, wallLoad = false, wallRaf = 0, wallLast = 0, wallDirty = true;
-  if (mosaic) { wallC.setAttribute('aria-hidden', 'true'); mosaic.appendChild(wallC); mosaic.classList.add('drawn'); }
+  // the canvas covers the whole film area: the wall's 22×12 squares keep their place (WE where it is), and past the wall's
+  // edges the squares run on (repeats of the quiet ones), so on a narrow or short screen the wall still fills the frame
+  // (operator, on a phone: 'WE 저거 타일 우측에 비어보이는데')
+  const fwEl = film.querySelector('.finwall');
+  let gx0 = 0, gy0 = 0, pitchX = 0, pitchY = 0, cellW = 0, cellH = 0;
+  if (mosaic && fwEl) { wallC.setAttribute('aria-hidden', 'true'); wallC.className = 'wallc'; fwEl.insertBefore(wallC, fwEl.firstChild); mosaic.classList.add('drawn'); }
   const canFilter = (() => { try { const x = document.createElement('canvas').getContext('2d'); if (!('filter' in x)) return false; x.filter = 'grayscale(1)'; return x.filter === 'grayscale(1)'; } catch (e) { return false; } })();
   function grayOf(im, we) {                               // CSS grayscale(1) (+ the WE squares' brightness 1.12, contrast 1.05)
     const c = document.createElement('canvas'); c.width = im.naturalWidth || im.width || 160; c.height = im.naturalHeight || im.height || 160;
@@ -855,38 +860,55 @@
     im.src = ATLAS;
   }
   function sizeWall() {
-    if (!mosaic) return;
-    const w = mosaic.offsetWidth, h = mosaic.offsetHeight; if (!w || !h) return;
+    if (!mosaic || !fwEl) return;
+    const w = fwEl.offsetWidth, h = fwEl.offsetHeight; if (!w || !h) return;
     wDpr = Math.min(2, devicePixelRatio || 1);
     const cw = Math.round(w * wDpr), ch = Math.round(h * wDpr);
     if (wallC.width !== cw || wallC.height !== ch) { wallC.width = cw; wallC.height = ch; wctx = wallC.getContext('2d'); }
-    wW = w; wH = h; gap = matchMedia('(max-aspect-ratio: 1/1)').matches ? 1 : 2; wallDirty = true; kickWall();
+    wW = w; wH = h; gap = matchMedia('(max-aspect-ratio: 1/1)').matches ? 1 : 2;
+    // where the wall's box sits in the film (measured unscaled: the crossing scales the whole layer)
+    const fr = fwEl.getBoundingClientRect(), mr = mosaic.getBoundingClientRect(), sc = fr.width / w || 1;
+    gx0 = (mr.left - fr.left) / sc; gy0 = (mr.top - fr.top) / sc;
+    const mw = mr.width / sc, mh = mr.height / sc;
+    cellW = (mw - gap * (COLS - 1)) / COLS; cellH = (mh - gap * (ROWS - 1)) / ROWS; pitchX = cellW + gap; pitchY = cellH + gap;
+    wallDirty = true; kickWall();
   }
   function drawWall(dt) {
-    if (!wctx || !wW) return false;
+    if (!wctx || !wW || !pitchX) return false;
     const k = 1 - Math.exp(-dt / .3), kt = 1 - Math.exp(-dt / .4);   // ~0.9 s and ~1.2 s to settle, as the CSS transitions
     let moving = false;
     const tealTo = formed ? 1 : 0; if (Math.abs(teal - tealTo) > .002) { teal += (tealTo - teal) * kt; moving = true; } else teal = tealTo;
-    const cw = (wW - gap * (COLS - 1)) / COLS, ch = (wH - gap * (ROWS - 1)) / ROWS, x = wctx;
-    x.setTransform(wDpr, 0, 0, wDpr, 0, 0);
-    x.clearRect(0, 0, wW, wH);
     for (const t of tiles) {
       const mTo = t.on ? 1 : 0, oTo = formed && !t.we ? .09 : .2;
       if (Math.abs(t.m - mTo) > .002) { t.m += (mTo - t.m) * k; moving = true; } else t.m = mTo;
       if (Math.abs(t.o - oTo) > .002) { t.o += (oTo - t.o) * k; moving = true; } else t.o = oTo;
-      const px = t.c * (cw + gap), py = t.r * (ch + gap);
-      x.globalAlpha = 1; x.fillStyle = '#dbe8e7'; x.fillRect(px, py, cw, ch);   // --teal-100 under every square
-      if (!atlas) continue;
-      const sx = t.c * TS, sy = t.r * TS;
-      if (t.we && teal > 0) {                                                    // WE: grey, brighter, then act teal multiplied in
-        x.globalAlpha = 1 - teal; x.drawImage(atlas, sx, sy, TS, TS, px, py, cw, ch);
-        if (weGray) { x.globalAlpha = teal; x.drawImage(weGray, t.wk * TS, 0, TS, TS, px, py, cw, ch); }
-        x.globalCompositeOperation = 'multiply'; x.globalAlpha = teal; x.fillStyle = '#0b6e78'; x.fillRect(px, py, cw, ch);
-        x.globalCompositeOperation = 'source-over';
-        continue;
+    }
+    const x = wctx, cw = cellW, ch = cellH;
+    x.setTransform(wDpr, 0, 0, wDpr, 0, 0);
+    x.clearRect(0, 0, wW, wH);
+    const c0 = Math.floor(-gx0 / pitchX), c1 = Math.ceil((wW - gx0) / pitchX), r0 = Math.floor(-gy0 / pitchY), r1 = Math.ceil((wH - gy0) / pitchY);
+    for (let r = r0; r < r1; r++) {
+      for (let c = c0; c < c1; c++) {
+        const real = c >= 0 && c < COLS && r >= 0 && r < ROWS;
+        const tc = ((c % COLS) + COLS) % COLS, tr = ((r % ROWS) + ROWS) % ROWS, t = tiles[tr * COLS + tc];
+        const px = gx0 + c * pitchX, py = gy0 + r * pitchY;
+        x.globalAlpha = 1; x.fillStyle = '#dbe8e7'; x.fillRect(px, py, cw, ch);   // --teal-100 under every square
+        if (!atlas || !t) continue;
+        const sx = tc * TS, sy = tr * TS;
+        if (!real && t.we) {                                // a repeat of a WE square outside the wall: one of the quiet ones
+          if (atlasGray) { x.globalAlpha = formed ? .09 : .2; x.drawImage(atlasGray, sx, sy, TS, TS, px, py, cw, ch); }
+          continue;
+        }
+        if (t.we && teal > 0) {                             // WE: grey, brighter, then act teal multiplied in
+          x.globalAlpha = 1 - teal; x.drawImage(atlas, sx, sy, TS, TS, px, py, cw, ch);
+          if (weGray) { x.globalAlpha = teal; x.drawImage(weGray, t.wk * TS, 0, TS, TS, px, py, cw, ch); }
+          x.globalCompositeOperation = 'multiply'; x.globalAlpha = teal; x.fillStyle = '#0b6e78'; x.fillRect(px, py, cw, ch);
+          x.globalCompositeOperation = 'source-over';
+          continue;
+        }
+        if (t.m < 1 && atlasGray) { x.globalAlpha = t.o * (1 - t.m); x.drawImage(atlasGray, sx, sy, TS, TS, px, py, cw, ch); }
+        if (t.m > 0) { x.globalAlpha = (t.we ? 1 : .92) * t.m; x.drawImage(atlas, sx, sy, TS, TS, px, py, cw, ch); }
       }
-      if (t.m < 1 && atlasGray) { x.globalAlpha = t.o * (1 - t.m); x.drawImage(atlasGray, sx, sy, TS, TS, px, py, cw, ch); }
-      if (t.m > 0) { x.globalAlpha = (t.we ? 1 : .92) * t.m; x.drawImage(atlas, sx, sy, TS, TS, px, py, cw, ch); }
     }
     x.globalAlpha = 1;
     return moving;

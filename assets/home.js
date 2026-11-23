@@ -14,6 +14,7 @@
   const els = $$('.road > .stop');
   const stations = els;
   const ticks = $$('.rail a'), cam = $('.rail .cam'), fill = $('.rail .fill'), nextEl = $('.rail .next');
+  const qg = $('.hero .qgive');   // the give bar on the lawn (site.css): it fades with the words
   const takeEl = $('.take'), M = JSON.parse(takeEl.dataset.take);
   const onTake = new Map(M.stops.map(s => [s.id, s]));   // s0, s1, s2 → their holds on the take; tail → its last shot
   const T = onTake.get('tail');
@@ -297,7 +298,11 @@
     html.classList.toggle('moving', !p.hold && v > .55);
     html.classList.toggle('vhold', !!(p.hold && st._take && p.i > 0));   // a bare undefined would flip the class, not clear it
     html.classList.toggle('at-top', v < HERO * .6);
-    html.style.setProperty('--ho', (1 - clamp(v / .55)).toFixed(3));
+    const ho = 1 - clamp(v / .55);
+    html.style.setProperty('--ho', ho.toFixed(3));
+    // the give bar: no clicks once it is fainter than half (the dock has come in by then), gone once it has faded out
+    if (qg) { qg.style.pointerEvents = ho < .5 ? 'none' : ''; qg.style.visibility = ho > .01 ? '' : 'hidden'; }
+    window.weactDock && window.weactDock();   // the give dock (site.js) comes in once the hero's give bar has faded
     // light: the page turns to day once the scene in front of you is lit
     const front = p.hold || p.tail ? st : (p.t > .5 ? nx : st);   // while the take plays on to its last shot, it is still in front
     const day = front._take ? bright(f) : front.classList.contains('t-day');   // on the take the frame decides: lawn and eye are day

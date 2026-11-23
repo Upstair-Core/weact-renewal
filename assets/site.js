@@ -243,10 +243,10 @@
     });
   }
 
-  // ---------- B안: the give dock (the cover bar's summary, on the right edge) and the panel it opens ----------
+  // ---------- A·B안: the give dock (the give bar's summary, on the right edge) · B안: the panel the masthead opens ----------
   const dock = $('.vb-dock'), dr = $('#give-drawer'), veil = $('.gd-veil');
   if (dock && dr) {
-    const isB = () => html.dataset.v === 'b';
+    const isB = () => html.dataset.v === 'b', docked = () => html.dataset.v !== 'c';
     const onDonate = document.body.dataset.page === 'donate';
     const seg = $$('.vd-seg button', dock), go = $('.vd-go', dock);
     const qbar = $('.qgive'), foot = $('.foot');
@@ -259,10 +259,13 @@
     document.addEventListener('give', paint); paint();
     // it waits until the cover's bar has gone (or, on other pages, until the first screen has), and steps aside for the footer
     const show = () => {
-      let v = isB() && !onDonate && !dr.classList.contains('open');
-      if (v && qbar) { const r = qbar.getBoundingClientRect(); v = !(parseFloat(qbar.style.opacity || '1') > .5 && r.bottom > 0 && r.top < innerHeight); }
+      let v = docked() && !onDonate && !dr.classList.contains('open');
+      // the bar fades by an inline opacity on B's cover (b.js) and by --ho in the A hero (home.css): the computed value
+      if (v && qbar) { const r = qbar.getBoundingClientRect(), o = parseFloat(qbar.style.opacity || getComputedStyle(qbar).opacity);
+        v = !(o > .5 && r.bottom > 0 && r.top < innerHeight && getComputedStyle(qbar).visibility !== 'hidden'); }
       else if (v) v = scrollY > innerHeight * .7;
-      if (v && foot) v = foot.getBoundingClientRect().top > innerHeight - 24;
+      // (the A home in film mode draws no footer: display:none has no box, and its top would read 0)
+      if (v && foot && foot.getClientRects().length) v = foot.getBoundingClientRect().top > innerHeight - 24;
       dock.classList.toggle('in', v);
     };
     window.weactDock = show;

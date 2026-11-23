@@ -116,9 +116,14 @@ html.film .hero{opacity:1; visibility:visible}
 html.film .hero::before{background:
   linear-gradient(90deg, rgba(246,248,247,.78) 0%, rgba(238,243,244,.56) 22%, rgba(238,243,244,.16) 38%, rgba(238,243,244,0) 48%),
   linear-gradient(255deg, rgba(19,84,122,.5) 0%, rgba(31,127,140,.3) 22%, rgba(128,208,199,.12) 40%, rgba(128,208,199,0) 56%)}
-html.film .hero .ov{top:auto; bottom:calc(var(--u)*96); width:calc(var(--u)*600); opacity:var(--ho,1); pointer-events:auto}
+/* the give bar (site.css, the one on B's cover) runs along the bottom of the lawn from the column's edge; the cue and
+   the words stand above it (--qb: the bar's top, 72px tall). It fades with the words (--ho); home.js takes it away once
+   it has faded, so it is no click and no tab stop under the stations */
+html.film .hero{--qb:calc(var(--u)*34 + 72px)}
+html.film .hero .ov{top:auto; bottom:calc(var(--qb) + var(--u)*86); width:calc(var(--u)*600); opacity:var(--ho,1); pointer-events:auto}
 html.film .hero .ov > *{animation:rise .7s var(--ease) both}
-html.film .hero .cue{position:absolute; z-index:11; left:var(--lx); bottom:calc(var(--u)*26); opacity:var(--ho,1)}
+html.film .hero .cue{position:absolute; z-index:11; left:var(--lx); bottom:calc(var(--qb) + var(--u)*22); opacity:var(--ho,1)}
+html.film .hero .qgive{position:absolute; z-index:11; left:var(--lx); bottom:calc(var(--u)*34); width:min(1100px, calc(100vw - var(--lx) - var(--rx))); opacity:var(--ho,1)}
 
 /* the finale fills the frame like every other station: 22×12 squares of 60 frame px, cover-fitted */
 html.film .fin .mosaic{position:absolute; z-index:0; left:50%; top:50%; --cv:max(100vw / 1280, 100vh / 720);
@@ -178,6 +183,9 @@ html:not(.film) .stop .ov{padding:0 var(--lx); margin-top:calc(var(--u)*-36); ma
 html:not(.film) .stop .count{padding:0 var(--lx); margin-top:calc(var(--u)*28)}
 html:not(.film) .stop .count.in{padding:0; margin-top:calc(var(--u)*24)}
 html:not(.film) .hero .cue{display:none}
+html:not(.film) .hero .qgive{position:relative; z-index:10; margin-top:28px}
+/* on a phone the give dock (site.css) is a bar along the bottom: here it stands on the rail */
+@media (max-width:1023px){ html:not(.film) .vb-dock{bottom:calc(62px + env(safe-area-inset-bottom))} }
 html:not(.film) .fin{padding-top:24px}
 html:not(.film) .fin::before{display:none}
 html:not(.film) .fin .mosaic{aspect-ratio:1320/720; margin:0 0 24px}

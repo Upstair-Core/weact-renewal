@@ -50,6 +50,17 @@ html.snap .snapfilm{display:block; position:relative; height:100vh; height:100sv
 .snapfilm .copy.fin{background:none; padding:0; width:calc(var(--u)*470)}
 .snapfilm .copy.fin .legal{display:none}
 
+/* the wall's animation, lighter: up to ~115 squares change at once, so each fades by opacity only (grey ↔ colour flips at
+   once instead of a 0.9 s filter transition, which repaints every square every frame), and the act-teal multiply layer
+   exists only on the 33 WE squares instead of all 264 (each blend layer is composited against what is under it) */
+.snapfilm .finwall .mosaic img{transition:opacity .9s var(--ease)}
+.snapfilm .finwall .mosaic li::after{content:none}
+.snapfilm .finwall .mosaic li.w::after{content:""}
+.snapfilm.day > .grain{display:none}                /* the animated overlay grain is for the night frames only */
+
+.snapfilm .finwall .mosaic.drawn ul{display:none}          /* drawn on one canvas by snap.js */
+.snapfilm .finwall .mosaic canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+
 /* the words at each stop: the station's column */
 .snapfilm .copy{position:absolute; z-index:6; left:var(--lx); width:calc(var(--u)*446); visibility:hidden; pointer-events:none;
   transition:visibility 0s linear .3s}

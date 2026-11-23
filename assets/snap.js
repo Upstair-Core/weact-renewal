@@ -80,6 +80,7 @@
       once(v, 'loadedmetadata', () => { prime(); kick(); }, 10000);
       kick();
     }
+    if (token === loadToken) loadWall();
   }
 
   /* ---------- state ---------- */
@@ -736,31 +737,126 @@
   }
   addEventListener('scroll', onScroll, { passive: true });
 
-  const mosaic = film.querySelector('.finwall .mosaic'), tiles = mosaic ? [...mosaic.querySelectorAll('li')] : [];
+  /* ---------- 05 집: the wall of squares, drawn on one canvas ----------
+     The stations' own wall (home.js finale): every square lights once like windows at dusk, the children who found a
+     family light left to right and stay, drawing WE, which settles into act teal; the count climbs. As 264 photo
+     elements fading with grayscale filters and a multiply layer each, it stuttered (operator: 'WE 타일 기반 애니매이션쪽이
+     버벅인다'), so the same timing is drawn here: grey and colour copies of each picture, opacity eased like the CSS
+     (0.9 s, teal 1.2 s), one canvas layer. Pictures load after the film's media, or when the film nears 집. */
+  const mosaic = film.querySelector('.finwall .mosaic');
+  const tileEls = mosaic ? [...mosaic.querySelectorAll('li')] : [];
   const COLS = mosaic ? (+getComputedStyle(mosaic).getPropertyValue('--cols') || 22) : 22;
+  const ROWS = mosaic ? (+getComputedStyle(mosaic).getPropertyValue('--rows') || 12) : 12;
   let seed = 7;
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;   // fixed sequence: the same wall every visit (as home.js)
-  tiles.forEach((li, i) => {
-    const c = i % COLS, we = li.classList.contains('w');
-    li._a = we ? .3 + .42 * (c - 10) / 9 + .03 * rnd() : .03 + .4 * rnd();   // when it lights
-    li._b = we ? 9 : li._a + .14 + .12 * rnd();                               // when it goes quiet again (never, for WE)
-    li._on = false;
+  const tiles = tileEls.map((li, i) => {
+    const c = i % COLS, we = li.classList.contains('w'), im = li.querySelector('img');
+    const a = we ? .3 + .42 * (c - 10) / 9 + .03 * rnd() : .03 + .4 * rnd();   // when it lights
+    const b = we ? 9 : a + .14 + .12 * rnd();                                  // when it goes quiet again (never, for WE)
+    return { i, c, r: Math.floor(i / COLS), we, a, b, src: im ? (im.dataset.tile || im.dataset.src || '') : '', img: null, gray: null, on: false, m: 0, o: .2 };
   });
+  const wallC = document.createElement('canvas');
+  let wctx = null, wDpr = 1, wW = 0, wH = 0, gap = 2, formed = false, teal = 0, wallLoad = false, wallRaf = 0, wallLast = 0, wallDirty = true;
+  if (mosaic) { wallC.setAttribute('aria-hidden', 'true'); mosaic.appendChild(wallC); mosaic.classList.add('drawn'); }
+  const canFilter = (() => { try { const x = document.createElement('canvas').getContext('2d'); if (!('filter' in x)) return false; x.filter = 'grayscale(1)'; return x.filter === 'grayscale(1)'; } catch (e) { return false; } })();
+  function grayOf(im, we) {                               // CSS grayscale(1) (+ the WE squares' brightness 1.12, contrast 1.05)
+    const c = document.createElement('canvas'); c.width = im.naturalWidth || 160; c.height = im.naturalHeight || 160;
+    const x = c.getContext('2d');
+    if (canFilter) { x.filter = we ? 'grayscale(1) brightness(1.12) contrast(1.05)' : 'grayscale(1)'; x.drawImage(im, 0, 0, c.width, c.height); return c; }
+    x.drawImage(im, 0, 0, c.width, c.height);
+    try {
+      const d = x.getImageData(0, 0, c.width, c.height), p = d.data;
+      for (let k = 0; k < p.length; k += 4) {
+        let g = .2126 * p[k] + .7152 * p[k + 1] + .0722 * p[k + 2];
+        if (we) g = (g * 1.12 - 128) * 1.05 + 128;
+        p[k] = p[k + 1] = p[k + 2] = g < 0 ? 0 : g > 255 ? 255 : g;
+      }
+      x.putImageData(d, 0, 0);
+    } catch (e) {}
+    return c;
+  }
+  // grey copies are made a few at a time (at most ~5 ms a frame), so a burst of pictures arriving never holds a frame
+  const grayQ = []; let grayRaf = 0;
+  function pumpGray() {
+    grayRaf = 0; const t0 = now();
+    while (grayQ.length && now() - t0 < 5) { const t = grayQ.shift(); t.gray = grayOf(t.im, false); if (t.we) t.grayWe = grayOf(t.im, true); t.img = t.im; }
+    wallDirty = true; kickWall();
+    if (grayQ.length) grayRaf = requestAnimationFrame(pumpGray);
+  }
+  function loadWall() {
+    if (wallLoad || !mosaic) return; wallLoad = true;
+    tiles.forEach((t) => {
+      if (!t.src) return;
+      const im = new Image(); im.decoding = 'async';
+      im.onload = () => { (im.decode ? im.decode() : Promise.resolve()).catch(() => {}).then(() => { t.im = im; grayQ.push(t); if (!grayRaf) grayRaf = requestAnimationFrame(pumpGray); }); };
+      im.src = t.src;
+    });
+  }
+  function sizeWall() {
+    if (!mosaic) return;
+    const w = mosaic.offsetWidth, h = mosaic.offsetHeight; if (!w || !h) return;
+    wDpr = Math.min(2, devicePixelRatio || 1);
+    const cw = Math.round(w * wDpr), ch = Math.round(h * wDpr);
+    if (wallC.width !== cw || wallC.height !== ch) { wallC.width = cw; wallC.height = ch; wctx = wallC.getContext('2d'); }
+    wW = w; wH = h; gap = matchMedia('(max-aspect-ratio: 1/1)').matches ? 1 : 2; wallDirty = true; kickWall();
+  }
+  function drawWall(dt) {
+    if (!wctx || !wW) return false;
+    const k = 1 - Math.exp(-dt / .3), kt = 1 - Math.exp(-dt / .4);   // ~0.9 s and ~1.2 s to settle, as the CSS transitions
+    let moving = false;
+    const tealTo = formed ? 1 : 0; if (Math.abs(teal - tealTo) > .002) { teal += (tealTo - teal) * kt; moving = true; } else teal = tealTo;
+    const cw = (wW - gap * (COLS - 1)) / COLS, ch = (wH - gap * (ROWS - 1)) / ROWS, x = wctx;
+    x.setTransform(wDpr, 0, 0, wDpr, 0, 0);
+    x.clearRect(0, 0, wW, wH);
+    for (const t of tiles) {
+      const mTo = t.on ? 1 : 0, oTo = formed && !t.we ? .09 : .2;
+      if (Math.abs(t.m - mTo) > .002) { t.m += (mTo - t.m) * k; moving = true; } else t.m = mTo;
+      if (Math.abs(t.o - oTo) > .002) { t.o += (oTo - t.o) * k; moving = true; } else t.o = oTo;
+      const px = t.c * (cw + gap), py = t.r * (ch + gap);
+      x.globalAlpha = 1; x.fillStyle = '#dbe8e7'; x.fillRect(px, py, cw, ch);   // --teal-100 under every square
+      if (!t.img) continue;
+      if (t.we && teal > 0) {                                                    // WE: grey, brighter, then act teal multiplied in
+        x.globalAlpha = 1 - teal; x.drawImage(t.img, px, py, cw, ch);
+        x.globalAlpha = teal; x.drawImage(t.grayWe, px, py, cw, ch);
+        x.globalCompositeOperation = 'multiply'; x.globalAlpha = teal; x.fillStyle = '#0b6e78'; x.fillRect(px, py, cw, ch);
+        x.globalCompositeOperation = 'source-over';
+        continue;
+      }
+      if (t.m < 1) { x.globalAlpha = t.o * (1 - t.m); x.drawImage(t.gray, px, py, cw, ch); }
+      if (t.m > 0) { x.globalAlpha = (t.we ? 1 : .92) * t.m; x.drawImage(t.img, px, py, cw, ch); }
+    }
+    x.globalAlpha = 1;
+    return moving;
+  }
+  function wallTick(tn) {
+    wallRaf = 0;
+    const dt = Math.min(.1, (tn - (wallLast || tn)) / 1000); wallLast = tn;
+    const moving = drawWall(dt); wallDirty = false;
+    if (moving || finRunning) wallRaf = requestAnimationFrame(wallTick); else wallLast = 0;
+  }
+  function kickWall() { if (!wallRaf && wctx) wallRaf = requestAnimationFrame(wallTick); }
   const finCount = copies[copies.length - 1].querySelector('.meta b'), finTotal = finCount ? +finCount.textContent.replace(/\D/g, '') : 0;
   const FIN_MS = 4200;
-  let finP = -1, finT0 = 0, finRaf = 0, finPlayed = false;
+  let finP = -1, finT0 = 0, finRaf = 0, finPlayed = false, finRunning = false;
   function finale(p) {
     if (p === finP || !mosaic) return; finP = p;
-    tiles.forEach((li) => { const on = p >= li._a && p < li._b; if (on !== li._on) { li._on = on; li.classList.toggle('on', on); } });
-    mosaic.classList.toggle('formed', p >= .8);
+    for (const t of tiles) t.on = p >= t.a && p < t.b;
+    formed = p >= .8;
+    mosaic.classList.toggle('formed', formed);           // the warm glow after it (.mosaic.formed + .glow)
     if (finCount) finCount.textContent = Math.round(finTotal * (1 - Math.pow(1 - Math.min(1, p / .78), 3))).toLocaleString('ko-KR');
+    kickWall();
   }
-  function finRun() { const p = Math.min(1, (now() - finT0) / FIN_MS); finale(p); finRaf = p < 1 ? requestAnimationFrame(finRun) : 0; }
+  function finRun() { const p = Math.min(1, (now() - finT0) / FIN_MS); finale(p); finRunning = p < 1; finRaf = finRunning ? requestAnimationFrame(finRun) : 0; }
   function finWatch() {                                   // plays once each time the film comes to rest on 집
+    if ((S.mode === 'idle' ? S.at : S.k) >= LAST - 2) loadWall();
     const atFin = S.mode === 'idle' && S.at === LAST;
-    if (atFin && !finPlayed) { finPlayed = true; finT0 = now(); finale(0); cancelAnimationFrame(finRaf); finRaf = requestAnimationFrame(finRun); }
-    else if (finPlayed && S.mode === 'idle' && S.at < LAST) { finPlayed = false; cancelAnimationFrame(finRaf); finRaf = 0; finale(0); }
+    if (atFin && !finPlayed) { finPlayed = true; sizeWall(); finT0 = now(); finale(0); cancelAnimationFrame(finRaf); finRunning = true; finRaf = requestAnimationFrame(finRun); }
+    else if (finPlayed && S.mode === 'idle' && S.at < LAST) {
+      finPlayed = false; finRunning = false; cancelAnimationFrame(finRaf); finRaf = 0; finale(0);
+      for (const t of tiles) { t.m = 0; t.o = .2; } teal = 0; kickWall();
+    }
   }
+  if (mosaic) { addEventListener('resize', () => { clearTimeout(sizeWall._t); sizeWall._t = setTimeout(sizeWall, 150); }); requestAnimationFrame(sizeWall); }
   finale(0);
 
   function fitCopies() {

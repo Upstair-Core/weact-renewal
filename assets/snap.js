@@ -55,32 +55,49 @@
     return v;
   }
   let loadToken = 0;
+  const PROG = {};                                        // download share per stretch file, 'p0f' … 'l3r'
+  const T_START = performance.now();
+  let progT = 0;
+  function progUI() { const tn = performance.now(); if (tn - progT > 90) { progT = tn; updateUI(); } }
+  setTimeout(() => updateUI(), 900);                      // the lawn says it is getting ready if the first file is slow
+  const fetching = new Map();
+  const fileUrl = (k, d, vr) => `media/film/${SEGS[k].name}-${vr}-${d}.mp4?v=1`;   // ?v: a new cut under the same name must not come from the cache
+  function getBlob(url, key) {
+    if (blobs.has(url)) return Promise.resolve(blobs.get(url));
+    if (fetching.has(url)) return fetching.get(url);
+    const pr = (async () => {
+      let src;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(String(res.status));
+        const total = +res.headers.get('content-length') || 0;
+        if (res.body && res.body.getReader && total) {        // in chunks, so the chip can say how far along it is
+          const rd = res.body.getReader(), parts = []; let got = 0;
+          for (;;) { const { done, value } = await rd.read(); if (done) break; parts.push(value); got += value.length; PROG[key] = got / total; progUI(); }
+          src = URL.createObjectURL(new Blob(parts, { type: 'video/mp4' }));
+        } else src = URL.createObjectURL(await res.blob());
+        PROG[key] = 1;
+      } catch (e) { src = url; }
+      blobs.set(url, src); return src;
+    })();
+    fetching.set(url, pr); return pr;
+  }
+  async function attach(k, d, token) {
+    const vr = variant, src = await getBlob(fileUrl(k, d, vr), vr + k + d);
+    if (token !== loadToken || vr !== variant || V[k].ok[d]) return;
+    const v = V[k][d];
+    v._unlocked = false;
+    v.src = src; v.load();
+    V[k].ok[d] = true;
+    once(v, 'loadedmetadata', () => { prime(); kick(); }, 10000);
+    kick();
+    if (k === 0 && d === 'f') loadWall();               // the wall's one picture rides right behind the first stretch
+  }
+  function need(k, d) { if (V[k] && !V[k].ok[d]) attach(k, d, loadToken); }   // the film waits on it: start it now
   async function loadMedia() {
-    const token = ++loadToken, vr = variant;
-    const order = [];
-    SEGS.forEach((s, k) => { if (s.kind === 'video') order.push([k, 'f']); });
-    SEGS.forEach((s, k) => { if (s.kind === 'video') order.push([k, 'r']); });
-    for (const [k, d] of order) {
-      if (token !== loadToken) return;
-      const url = `media/film/${SEGS[k].name}-${vr}-${d}.mp4?v=1`;   // ?v: a new cut under the same file name must not come from the browser cache
-      let src = blobs.get(url);
-      if (!src) {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(String(res.status));
-          src = URL.createObjectURL(await res.blob());
-        } catch (e) { src = url; }
-        blobs.set(url, src);
-      }
-      if (token !== loadToken) return;
-      const v = V[k][d];
-      v._unlocked = false;
-      v.src = src; v.load();
-      V[k].ok[d] = true;
-      once(v, 'loadedmetadata', () => { prime(); kick(); }, 10000);
-      kick();
-      if (k === 0 && d === 'f') loadWall();               // the wall's one picture rides right behind the first stretch
-    }
+    const token = ++loadToken;
+    const order = [[0, 'f'], [1, 'f'], [0, 'r'], [2, 'f'], [1, 'r'], [3, 'f'], [2, 'r'], [3, 'r']].filter(([k]) => SEGS[k] && SEGS[k].kind === 'video');
+    for (const [k, d] of order) { if (token !== loadToken) return; await attach(k, d, token); }
   }
 
   /* ---------- state ---------- */
@@ -137,7 +154,7 @@
     S.fade = reduce.matches;
     if (seg.kind === 'video' && !S.fade) {
       const d = dir > 0 ? 'f' : 'r';
-      if (V[k].ok[d]) begin(V[k][d], 0.5 / FPS); else S.waitLoad = true;
+      if (V[k].ok[d]) begin(V[k][d], 0.5 / FPS); else { S.waitLoad = true; need(k, d); }
     }
     updateUI(); kick();
   }
@@ -179,7 +196,10 @@
     }
     const d = S.dir > 0 ? 'f' : 'r';
     const nv = V[S.k][d];
-    if (!V[S.k].ok[d]) { arrive(true); return; }
+    if (!V[S.k].ok[d]) {                                    // turned back before that file arrived: hold and wait
+      try { old.pause(); } catch (e) {}
+      S.t = activeT(); S.under = old; S.active = null; S.waitLoad = true; S.t0 = now(); need(S.k, d); updateUI(); return;
+    }
     try { old.pause(); } catch (e) {}
     const D = old.duration || seg.dur;
     const mirror = clamp(D - old.currentTime, 0, D);
@@ -240,6 +260,11 @@
   function grab(d) {
     if (S.releasing) return false;
     if (S.mode === 'scrub') return true;
+    if (S.mode === 'play' && S.waitLoad) return false;     // already asked: keep waiting for the file
+    if (S.mode === 'idle' && !reduce.matches) {
+      const k = d > 0 ? S.at : S.at - 1, q = V[k];
+      if (k >= 0 && k < SEGS.length && SEGS[k].kind === 'video' && !(q && q.ok.f)) { start(k, d); return false; }
+    }
     if (S.mode === 'idle') {
       const k = d > 0 ? S.at : S.at - 1;
       if (k < 0 || k >= SEGS.length) return false;
@@ -300,7 +325,10 @@
     updateUI(); kick();
     if (seg.kind !== 'video' || S.fade) return;
     const d = dir > 0 ? 'f' : 'r', p = V[k];
-    if (!p || !p.ok[d]) { arrive(true); return; }
+    if (!p || !p.ok[d]) {                                   // the way back has not arrived: hold this frame and wait
+      if (S.active) S.under = S.active;
+      S.active = null; S.waitLoad = true; S.t0 = now(); need(k, d); updateUI(); kick(); return;
+    }
     const v = p[d], cur = S.active;
     if (cur && cur !== v) S.under = cur;                    // the held frame stays up until the other file has its frame
     const Dv = v.duration || D;
@@ -575,8 +603,11 @@
     }
     const d = S.dir > 0 ? 'f' : 'r';
     if (S.waitLoad) {
-      if (V[S.k].ok[d]) { S.waitLoad = false; begin(V[S.k][d], 0.5 / FPS); }
-      else if (tn - S.t0 > 12000) arrive(true);
+      if (V[S.k].ok[d]) {
+        S.waitLoad = false; updateUI();
+        const v = V[S.k][d], Dv = v.duration || seg.dur;
+        begin(v, d === 'f' ? frameTime(v, S.k, S.t) : clamp(Dv - S.t, 0.5 / FPS, Dv - 0.5 / FPS));   // from the frame it waited on
+      } else if (tn - S.t0 > 45000) arrive(true);           // a file that never comes: the stop, after a long wait
       return true;
     }
     const v = S.active;
@@ -700,7 +731,13 @@
     const moving = S.mode !== 'idle';
     ticks.forEach((a, k) => { if (!moving && k === S.at - 1) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current'); });
     film.classList.toggle('fresh', !moving && S.at === 0 && !S.stepped);
-    const c = S.mode === 'play' && S.waitLoad ? (chip.dataset.wait || '영상 불러오는 중') : '';
+    // the chip: what the film waits for and how far its file has come
+    let c = '', key = '';
+    if (S.mode === 'play' && S.waitLoad) key = variant + S.k + (S.dir > 0 ? 'f' : 'r');
+    else if (S.mode === 'idle' && S.at === 0 && !(V[0] && V[0].ok.f) && performance.now() - T_START > 800) key = variant + '0f';
+    const pct = key ? Math.min(99, Math.floor(100 * (PROG[key] || 0))) : 0;
+    if (key) { c = `${chip.dataset.wait || '영상 불러오는 중'} ${pct}%`; chip.style.setProperty('--p', (pct / 100).toFixed(2)); }
+    root.classList.toggle('wait', !!c);
     if (c) chip.textContent = c;
     chip.classList.toggle('on', !!c);
     document.body.classList.toggle('owns', filmOwns() && !pageNext());

@@ -87,9 +87,15 @@ html.snap .snapfilm{display:block; position:relative; height:100vh; height:100sv
 
 .snapfilm .cue{position:absolute; z-index:6; left:var(--lx); bottom:calc(var(--u)*26); opacity:0; transition:opacity .4s var(--ease); pointer-events:none}
 .snapfilm.fresh .cue{opacity:1}
-.snapfilm .snapchip{position:absolute; z-index:7; top:calc(env(safe-area-inset-top, 0px) + 84px); left:50%; transform:translateX(-50%); max-width:calc(100% - 32px);
-  font-size:12px; line-height:1.4; padding:6px 12px; border-radius:999px; background:rgba(3,27,31,.72); color:#f1f5f4; opacity:0; transition:opacity .25s ease; text-align:center}
+.snapfilm .snapchip{position:absolute; z-index:7; top:calc(env(safe-area-inset-top, 0px) + max(84px, var(--u) * 100)); left:50%; transform:translateX(-50%);
+  max-width:calc(100% - 32px); overflow:hidden; font-size:13.5px; font-weight:600; line-height:1.3; letter-spacing:-.005em; font-variant-numeric:tabular-nums;
+  padding:9px 16px 11px; border-radius:999px; background:rgba(3,27,31,.8); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  color:#f1f5f4; box-shadow:0 6px 24px rgba(3,27,31,.25); opacity:0; transition:opacity .25s ease; text-align:center; white-space:nowrap; pointer-events:none}
+/* how far the waited-for file has come: a bar along the chip's foot */
+.snapfilm .snapchip::after{content:""; position:absolute; left:14px; right:14px; bottom:5px; height:2px; border-radius:2px;
+  background:linear-gradient(90deg, #80d0c7 calc(var(--p, 0) * 100%), rgba(241,245,244,.22) 0)}
 .snapfilm .snapchip.on{opacity:1}
+html.snap.wait .rail .cam{animation:pulse 1s ease-in-out infinite}     /* waiting for a film file: the rail's camera breathes */
 
 /* the rail over the film: the stations' rail (left column, under the words); hidden on the lawn as before.
    Once the film has scrolled away (html.past) it is the stack's bar along the bottom, over the finale */

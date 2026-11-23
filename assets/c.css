@@ -112,3 +112,9 @@
   .cards.dogs.four{grid-template-columns:repeat(2, minmax(0,1fr))}
   .c-rail{display:none}
 }
+/* a phone held upright would show only the middle quarter of the 16:9 take (the WE ACT! on the back cut in half):
+   there it is a window at the top, about half the frame wide, and the words stand below it on the night */
+@media (max-width:1023px) and (orientation:portrait){
+  .c-pin .stick video{inset:0 0 auto 0; height:58vh}
+  .c-pin .shade{background:linear-gradient(180deg, rgba(3,27,31,.55) 0, rgba(3,27,31,0) 14vh, rgba(3,27,31,0) 34vh, rgba(3,27,31,.72) 48vh, rgba(3,27,31,.96) 56vh, #031b1f 58vh)}
+}

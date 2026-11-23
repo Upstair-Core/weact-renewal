@@ -1,0 +1,170 @@
+/* A home · the film (snap) — html.snap only. Ported from the scroll demo (28판): the hand moves the frames, a release
+   plays on to the next stop, each stop rests on the film's own keyframe as a sharp still. Wide screens keep the
+   left column of the stations (their type, their scrims); tall screens put the words below or above the subject.
+   Past the last stop the page scrolls on to the finale (#s5), shown as in the stack. */
+.snapfilm{display:none}
+html.snap,html.snap body{overscroll-behavior:none}
+html.snap body.owns{touch-action:none}
+html.snap:not(.snap-on) body{touch-action:none}     /* before snap.js runs: no native scroll under a finger (head guard) */
+html.snap .road{display:none}                     /* every station, 집 included, is now a stop inside the film */
+html.snap .snapfilm{display:block; position:relative; height:100vh; height:100svh; overflow:hidden; isolation:isolate; background:var(--night);
+  user-select:none; -webkit-user-select:none}
+.snapfilm .media{position:absolute; inset:0}
+.snapfilm video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; z-index:0; pointer-events:none; background:transparent}
+.snapfilm .still{position:absolute; inset:0; display:block; opacity:0; z-index:2; transform-origin:50% 50%; will-change:opacity, transform}
+.snapfilm picture.still img{display:block; width:100%; height:100%; object-fit:cover}
+.snapfilm .flash{position:absolute; inset:0; z-index:3; background:#FFFDF7; opacity:0; pointer-events:none}
+.snapfilm > .grain{z-index:3; opacity:.12; transition:opacity .7s var(--ease)}
+.snapfilm.day > .grain{opacity:0}
+
+/* scrims: the stations' own (night: deep teal; day: morning mist). Every layer only fades (opacity), never swaps its
+   gradient, so nothing jumps: full while a stop's words are up (.hold, set together with them), half while moving.
+   Wide screens: one layer from the left (the column). Tall screens: a bottom layer and a top layer (.scrim.hi), the one
+   on the edge the words sit on (data-pos) comes up, the other fades out. */
+.snapfilm{--day:0; --hold:.5; --bot:1; --top:0}
+.snapfilm.day{--day:1}
+.snapfilm.hold{--hold:1}
+.snapfilm .scrim{position:absolute; inset:0; z-index:4; pointer-events:none}
+.snapfilm .scrim::before,.snapfilm .scrim::after{content:""; position:absolute; inset:0; transition:opacity .6s var(--ease)}
+.snapfilm .scrim::before{background:var(--scrim-night); opacity:calc((1 - var(--day)) * var(--hold))}
+.snapfilm .scrim::after{background:var(--scrim-day); opacity:calc(var(--day) * var(--hold) * .85)}
+.snapfilm .scrim.hi{display:none}
+/* the lawn keeps its light: a mist only where the words are, as the hero had */
+.snapfilm .scrim.lawn{display:none}
+.snapfilm.at0 .scrim:not(.hi)::after{opacity:0}
+.snapfilm.at0 .scrim:not(.hi){background:
+  linear-gradient(90deg, rgba(246,248,247,.78) 0%, rgba(238,243,244,.56) 22%, rgba(238,243,244,.16) 38%, rgba(238,243,244,0) 48%),
+  linear-gradient(255deg, rgba(19,84,122,.5) 0%, rgba(31,127,140,.3) 22%, rgba(128,208,199,.12) 40%, rgba(128,208,199,0) 56%)}
+
+/* 05 집 inside the film: the stations' wall, 22×12 squares of 60 frame px, cover-fitted; the mist from the left under its words */
+.snapfilm .finwall{background:var(--mist); overflow:hidden}
+.snapfilm .finwall .mosaic{position:absolute; z-index:0; left:50%; top:50%; --cv:max(100vw / 1280, 100svh / 720);
+  width:calc(var(--cv) * 1320); height:calc(var(--cv) * 720); translate:-50% -50%; transform-origin:69% 46%}
+.snapfilm .finwall .mosaic ul{width:100%; height:100%}
+.snapfilm .finwall .key{position:absolute; z-index:10; right:var(--rx); bottom:calc(var(--u)*24); opacity:0; transition:opacity .8s var(--ease) .3s}
+.snapfilm.atfin .finwall .key{opacity:1}
+.snapfilm .mist{position:absolute; inset:0; z-index:4; pointer-events:none; opacity:0; transition:opacity .6s var(--ease);
+  background:linear-gradient(90deg, rgba(246,248,247,.95) 0%, rgba(238,243,244,.88) 28%, rgba(219,232,231,.55) 37%, rgba(219,232,231,0) 44%),
+    linear-gradient(180deg, rgba(246,248,247,.7) 0%, rgba(246,248,247,0) 15%)}
+.snapfilm.atfin .mist{opacity:1}
+.snapfilm.atfin{--hold:0}
+.snapfilm .copy.fin{background:none; padding:0; width:calc(var(--u)*470)}
+.snapfilm .copy.fin .legal{display:none}
+
+/* the wall's animation, lighter: up to ~115 squares change at once, so each fades by opacity only (grey ↔ colour flips at
+   once instead of a 0.9 s filter transition, which repaints every square every frame), and the act-teal multiply layer
+   exists only on the 33 WE squares instead of all 264 (each blend layer is composited against what is under it) */
+.snapfilm .finwall .mosaic img{transition:opacity .9s var(--ease)}
+.snapfilm .finwall .mosaic li::after{content:none}
+.snapfilm .finwall .mosaic li.w::after{content:""}
+.snapfilm.day > .grain{display:none}                /* the animated overlay grain is for the night frames only */
+
+.snapfilm .finwall .mosaic.drawn ul{display:none}          /* drawn on one canvas by snap.js */
+.snapfilm .finwall .mosaic canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+
+/* the words at each stop: the station's column */
+.snapfilm .copy{position:absolute; z-index:6; left:var(--lx); width:calc(var(--u)*446); visibility:hidden; pointer-events:none;
+  transition:visibility 0s linear .3s}
+.snapfilm .copy.on{visibility:visible; pointer-events:auto; transition:visibility 0s}
+.snapfilm .copy[data-dpos="top"]{top:calc(var(--u)*80)}
+.snapfilm .copy[data-dpos="bottom"]{bottom:calc(var(--u)*96)}
+.snapfilm .copy.hero{width:calc(var(--u)*600)}
+.snapfilm .copy > *{opacity:0; transform:translateY(14px); transition:opacity .22s ease, transform .3s ease}
+.snapfilm .copy.on > *{opacity:1; transform:none; transition:opacity .55s ease, transform .8s cubic-bezier(.2,.7,.2,1)}
+.snapfilm .copy.on > :nth-child(2){transition-delay:.05s}
+.snapfilm .copy.on > :nth-child(3){transition-delay:.1s}
+.snapfilm .copy.on > :nth-child(4){transition-delay:.15s}
+.snapfilm .copy.on > :nth-child(5){transition-delay:.2s}
+.snapfilm .copy.on > :nth-child(6){transition-delay:.26s}
+.snapfilm .copy.t-night{text-shadow:0 1px 18px rgba(3,27,31,.35)}
+.snapfilm .copy .cards .nm{font-size:max(12.5px, calc(var(--u)*12.5)); line-height:1.35}
+.snapfilm .copy .cards .t,.snapfilm .copy .cards .sub.k{font-size:max(11.5px, calc(var(--u)*11))}
+.snapfilm .copy .cards{text-shadow:none}
+.snapfilm .copy .count{position:static; display:flex; flex-direction:column; gap:calc(var(--u)*6); margin:calc(var(--u)*24) 0 0}
+.snapfilm .copy .count small{font:800 max(13px, calc(var(--u)*14))/1.3 var(--display); letter-spacing:-.01em}
+.snapfilm .copy .count b{font:900 max(40px, calc(var(--u)*60))/.95 var(--display); letter-spacing:-.045em; font-variant-numeric:tabular-nums; color:var(--key)}
+.snapfilm .copy.t-night .count b{color:#80d0c7}
+
+.snapfilm .cue{position:absolute; z-index:6; left:var(--lx); bottom:calc(var(--u)*26); opacity:0; transition:opacity .4s var(--ease); pointer-events:none}
+.snapfilm.fresh .cue{opacity:1}
+.snapfilm .snapchip{position:absolute; z-index:7; top:calc(env(safe-area-inset-top, 0px) + 84px); left:50%; transform:translateX(-50%); max-width:calc(100% - 32px);
+  font-size:12px; line-height:1.4; padding:6px 12px; border-radius:999px; background:rgba(3,27,31,.72); color:#f1f5f4; opacity:0; transition:opacity .25s ease; text-align:center}
+.snapfilm .snapchip.on{opacity:1}
+
+/* the rail over the film: the stations' rail (left column, under the words); hidden on the lawn as before.
+   Once the film has scrolled away (html.past) it is the stack's bar along the bottom, over the finale */
+@media (min-aspect-ratio: 1/1){
+  html.snap:not(.past) .rail{left:var(--lx); right:auto; bottom:calc(var(--u)*18); width:calc(var(--u)*446); height:calc(var(--u)*34); padding:0}
+  html.snap:not(.past) .rail::before{display:none}
+  html.snap:not(.past) .rail .line,html.snap:not(.past) .rail .fill{top:calc(var(--u)*12)}
+  html.snap:not(.past) .rail a{top:calc(var(--u)*4); height:calc(var(--u)*30)}
+  html.snap:not(.past) .rail a span{top:calc(var(--u)*15)}
+  html.snap:not(.past) .rail .cam{top:calc(var(--u)*4)}
+}
+/* wide screens, per stop: 01's column stays left of the crew's back (WE ACT! and the hood); at 03 the thumbnails make
+   one row so the column ends above the dog's head */
+@media (min-aspect-ratio: 1/1){
+  .snapfilm .copy[data-i="1"]{width:min(calc(var(--u)*446), calc(27vw - var(--lx)))}
+  .snapfilm .copy[data-i="3"] .cards{grid-template-columns:repeat(6, minmax(0,1fr)); gap:calc(var(--u)*8)}
+  .snapfilm .copy[data-i="3"] .cards .row .t{display:none}
+}
+/* fit (snap.js) when a column would reach the rail: thumbnails slide in one row, then the long sentence goes */
+.snapfilm .copy.onerow .cards{display:flex; gap:calc(var(--u)*10); overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; touch-action:pan-x; padding-bottom:2px}
+.snapfilm .copy.onerow .cards::-webkit-scrollbar{display:none}
+.snapfilm .copy.onerow .cards li{flex:0 0 calc(var(--u)*124)}
+.snapfilm .copy.nodesc .desc{display:none}
+.snapfilm .copy.nocards .cards{display:none}
+.snapfilm .copy.nocredit .credit{display:none}
+html.snap.at-top .rail{opacity:0; pointer-events:none}
+html.snap.moving .rail .next{opacity:1}
+
+/* tall screens (phones): the film fills the screen, the centre 448:720 band; words below or above the subject */
+@media (max-aspect-ratio: 1/1){
+  .snapfilm .copy{left:var(--lx); right:var(--rx); width:auto}
+  .snapfilm .copy.hero{width:auto}
+  .snapfilm .copy[data-pos="top"]{top:calc(env(safe-area-inset-top, 0px) + 72px); bottom:auto}
+  .snapfilm .copy[data-pos="bottom"]{top:auto; bottom:calc(env(safe-area-inset-bottom, 0px) + 74px)}
+  .snapfilm .copy .hd{margin-top:8px; gap:12px}
+  .snapfilm .copy .hd .num{font-size:30px}
+  .snapfilm .copy .hd .nm{font-size:24px}
+  .snapfilm .copy .lede{font-size:16.5px; margin-top:8px; line-height:1.45}
+  .snapfilm .copy .desc{font-size:13.5px; line-height:1.6; margin-top:4px; max-width:none}
+  .snapfilm .copy.hero h1{font-size:24px; line-height:1.36}
+  /* thumbnails: one row the thumb can slide sideways */
+  .snapfilm .copy .cards{display:flex; gap:8px; overflow-x:auto; overscroll-behavior-x:contain; margin:12px calc(var(--rx) * -1) 0 calc(var(--lx) * -1);
+    padding:0 var(--rx) 2px var(--lx); scrollbar-width:none; touch-action:pan-x}
+  .snapfilm .copy .cards::-webkit-scrollbar{display:none}
+  .snapfilm .copy .cards li{flex:0 0 112px}
+  .snapfilm .copy .cards .card .pic{box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+  .snapfilm .copy .count{margin-top:12px}
+  .snapfilm .copy .count b{font-size:34px}
+  .snapfilm .copy .count small{font-size:12.5px}
+  /* scrims: bottom layer and top layer, each only fades */
+  .snapfilm[data-pos="top"]{--bot:0; --top:1}
+  .snapfilm .scrim.hi{display:block}
+  .snapfilm .scrim:not(.hi)::before{background:linear-gradient(0deg, rgba(3,27,31,.9) 0%, rgba(6,46,51,.72) 26%, rgba(10,63,69,.3) 46%, rgba(10,63,69,0) 60%);
+    opacity:calc((1 - var(--day)) * var(--hold) * var(--bot))}
+  .snapfilm .scrim:not(.hi)::after{background:linear-gradient(0deg, rgba(246,248,247,.94) 0%, rgba(238,243,244,.8) 24%, rgba(219,232,231,.3) 44%, rgba(219,232,231,0) 58%);
+    opacity:calc(var(--day) * var(--hold) * .85 * var(--bot))}
+  .snapfilm .scrim.hi::before{background:linear-gradient(180deg, rgba(3,27,31,.9) 0%, rgba(6,46,51,.72) 30%, rgba(10,63,69,.3) 50%, rgba(10,63,69,0) 64%);
+    opacity:calc((1 - var(--day)) * var(--hold) * var(--top))}
+  .snapfilm .scrim.hi::after{background:linear-gradient(180deg, rgba(246,248,247,.94) 0%, rgba(238,243,244,.82) 30%, rgba(219,232,231,.3) 50%, rgba(219,232,231,0) 64%);
+    opacity:calc(var(--day) * var(--hold) * .85 * var(--top))}
+  .snapfilm.at0 .scrim:not(.hi){background:linear-gradient(0deg, rgba(246,248,247,.9) 0%, rgba(238,243,244,.66) 22%, rgba(238,243,244,0) 42%)}
+  .snapfilm .cue{display:none}
+  /* 집 on a tall screen: the wall fills the film area as the other stops do. WE takes columns 10–19 and rows 2–8 of
+     the 22×12 wall, so squares are 1/11 of the width, WE centred across the screen under the masthead, its legend
+     under WE, the words low over the morning mist */
+  .snapfilm .finwall .mosaic{--tw:calc(100vw / 11); width:calc(var(--tw) * 22); height:calc(var(--tw) * 12); translate:none;
+    left:calc(50vw - var(--tw) * 15); top:calc(env(safe-area-inset-top, 0px) + 76px - var(--tw) * 2)}
+  .snapfilm .finwall .mosaic ul{gap:1px}
+  .snapfilm .finwall .key{left:var(--lx); right:auto; bottom:auto; top:calc(env(safe-area-inset-top, 0px) + 76px + 100vw / 11 * 7 + 14px); white-space:normal; display:inline-flex; max-width:calc(100vw - 32px)}
+  .snapfilm .copy.fin{width:auto}
+  .snapfilm .copy.fin h2{font-size:27px}
+  .snapfilm .mist{background:linear-gradient(0deg, rgba(246,248,247,.96) 0%, rgba(238,243,244,.9) 30%, rgba(219,232,231,.45) 44%, rgba(219,232,231,0) 54%)}
+  .snapfilm .snapchip{top:auto; bottom:calc(env(safe-area-inset-bottom, 0px) + 66px)}
+  .snapfilm[data-pos="bottom"] .snapchip{top:calc(env(safe-area-inset-top, 0px) + 72px); bottom:auto}
+}
+@media (prefers-reduced-motion: reduce){
+  .snapfilm .copy > *,.snapfilm .copy.on > *{transition:opacity .3s ease; transform:none}
+}

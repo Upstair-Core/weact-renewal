@@ -5,13 +5,13 @@
 .snapfilm{display:none}
 html.snap,html.snap body{overscroll-behavior:none}
 html.snap body.owns{touch-action:none}
-html.snap .road > .stop:not(.fin){display:none}
+html.snap .road{display:none}                     /* every station, 집 included, is now a stop inside the film */
 html.snap .snapfilm{display:block; position:relative; height:100vh; height:100svh; overflow:hidden; isolation:isolate; background:var(--night);
   user-select:none; -webkit-user-select:none}
 .snapfilm .media{position:absolute; inset:0}
 .snapfilm video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; z-index:0; pointer-events:none; background:transparent}
 .snapfilm .still{position:absolute; inset:0; display:block; opacity:0; z-index:2; transform-origin:50% 50%; will-change:opacity, transform}
-.snapfilm .still img{display:block; width:100%; height:100%; object-fit:cover}
+.snapfilm picture.still img{display:block; width:100%; height:100%; object-fit:cover}
 .snapfilm .flash{position:absolute; inset:0; z-index:3; background:#FFFDF7; opacity:0; pointer-events:none}
 .snapfilm > .grain{z-index:3; opacity:.12; transition:opacity .7s var(--ease)}
 .snapfilm.day > .grain{opacity:0}
@@ -32,6 +32,21 @@ html.snap .snapfilm{display:block; position:relative; height:100vh; height:100sv
   linear-gradient(255deg, rgba(19,84,122,.5) 0%, rgba(31,127,140,.3) 22%, rgba(128,208,199,.12) 40%, rgba(128,208,199,0) 56%);
   opacity:var(--ho,1); transition:opacity .5s var(--ease)}
 .snapfilm:not(.hold) .scrim{--ho:.35}
+
+/* 05 집 inside the film: the stations' wall, 22×12 squares of 60 frame px, cover-fitted; the mist from the left under its words */
+.snapfilm .finwall{background:var(--mist); overflow:hidden}
+.snapfilm .finwall .mosaic{position:absolute; z-index:0; left:50%; top:50%; --cv:max(100vw / 1280, 100svh / 720);
+  width:calc(var(--cv) * 1320); height:calc(var(--cv) * 720); translate:-50% -50%; transform-origin:69% 46%}
+.snapfilm .finwall .mosaic ul{width:100%; height:100%}
+.snapfilm .finwall .key{position:absolute; z-index:10; right:var(--rx); bottom:calc(var(--u)*24); opacity:0; transition:opacity .8s var(--ease) .3s}
+.snapfilm.atfin .finwall .key{opacity:1}
+.snapfilm .mist{position:absolute; inset:0; z-index:4; pointer-events:none; opacity:0; transition:opacity .6s var(--ease);
+  background:linear-gradient(90deg, rgba(246,248,247,.95) 0%, rgba(238,243,244,.88) 28%, rgba(219,232,231,.55) 37%, rgba(219,232,231,0) 44%),
+    linear-gradient(180deg, rgba(246,248,247,.7) 0%, rgba(246,248,247,0) 15%)}
+.snapfilm.atfin .mist{opacity:1}
+.snapfilm.atfin .scrim::before,.snapfilm.atfin .scrim::after{opacity:0}
+.snapfilm .copy.fin{background:none; padding:0; width:calc(var(--u)*470)}
+.snapfilm .copy.fin .legal{display:none}
 
 /* the words at each stop: the station's column */
 .snapfilm .copy{position:absolute; z-index:6; left:var(--lx); width:calc(var(--u)*446); visibility:hidden; pointer-events:none;
@@ -79,6 +94,13 @@ html.snap .snapfilm{display:block; position:relative; height:100vh; height:100sv
   .snapfilm .copy[data-i="3"] .cards{grid-template-columns:repeat(6, minmax(0,1fr)); gap:calc(var(--u)*8)}
   .snapfilm .copy[data-i="3"] .cards .row .t{display:none}
 }
+/* fit (snap.js) when a column would reach the rail: thumbnails slide in one row, then the long sentence goes */
+.snapfilm .copy.row .cards{display:flex; gap:calc(var(--u)*10); overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; touch-action:pan-x; padding-bottom:2px}
+.snapfilm .copy.row .cards::-webkit-scrollbar{display:none}
+.snapfilm .copy.row .cards li{flex:0 0 calc(var(--u)*124)}
+.snapfilm .copy.nodesc .desc{display:none}
+.snapfilm .copy.nocards .cards{display:none}
+.snapfilm .copy.nocredit .credit{display:none}
 html.snap.at-top .rail{opacity:0; pointer-events:none}
 html.snap.moving .rail .next{opacity:1}
 
@@ -114,6 +136,13 @@ html.snap.moving .rail .next{opacity:1}
     linear-gradient(0deg, rgba(246,248,247,.5) 0%, rgba(246,248,247,0) 14%)}
   .snapfilm.at0 .scrim{background:linear-gradient(0deg, rgba(246,248,247,.9) 0%, rgba(238,243,244,.66) 22%, rgba(238,243,244,0) 42%)}
   .snapfilm .cue{display:none}
+  /* 집 on a tall screen: the whole wall across the top, its legend under it, the words below */
+  .snapfilm .finwall .mosaic{left:0; right:0; top:calc(env(safe-area-inset-top, 0px) + 64px); width:100%; height:auto; aspect-ratio:1320/720; translate:none}
+  .snapfilm .finwall .mosaic ul{gap:1px}
+  .snapfilm .finwall .key{left:var(--lx); right:var(--rx); bottom:auto; top:calc(env(safe-area-inset-top, 0px) + 64px + 100vw * 720 / 1320 + 10px); white-space:normal; display:inline-flex}
+  .snapfilm .copy.fin{width:auto}
+  .snapfilm .copy.fin h2{font-size:27px}
+  .snapfilm .mist{background:linear-gradient(0deg, rgba(246,248,247,.96) 0%, rgba(238,243,244,.9) 40%, rgba(219,232,231,.4) 56%, rgba(219,232,231,0) 64%)}
   .snapfilm .chip{top:auto; bottom:calc(env(safe-area-inset-bottom, 0px) + 66px)}
   .snapfilm[data-pos="bottom"] .chip{top:calc(env(safe-area-inset-top, 0px) + 72px); bottom:auto}
 }

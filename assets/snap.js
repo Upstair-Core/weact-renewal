@@ -7,13 +7,14 @@
   'use strict';
   if (!document.documentElement.classList.contains('snap')) return;
   const STOPS = [...document.querySelectorAll('#snap .copy')].map((c) => ({ pos: c.dataset.pos, day: c.classList.contains('t-day') }));
-  const STOP_F = [0, 121, 242, 363, 483];               // the frame each stop rests on (the film's keyframes)
+  const STOP_F = [0, 121, 242, 363, 483, 483];          // the frame each stop rests on (the film's keyframes; 05 = the wall after it)
   const dayAt = (f) => f <= 67 || f >= 423;             // the lawn, and the morning after the bamboo slides away
   const SEGS = [
     { kind: 'video', name: 'seg1', dur: 122 / 24 },
     { kind: 'video', name: 'seg2', dur: 122 / 24 },
     { kind: 'video', name: 'seg3', dur: 122 / 24 },
     { kind: 'video', name: 'seg4', dur: 121 / 24 },
+    { kind: 'ghost', name: 'fin', dur: 1.4 },             // T → 집: the morning bench pushes in as the wall of squares fades over it
   ];
   const N = STOPS.length, LAST = N - 1;
   const FPS = 24;
@@ -23,7 +24,7 @@
   const TAP = 7;        // px a finger moves before it counts as a drag
   const $ = (s) => document.querySelector(s);
   const root = document.documentElement;
-  const film = $('#snap'), media = $('#snap-media'), flash = $('#snap-flash'), hd = $('.top'), after = $('#s5');
+  const film = $('#snap'), media = $('#snap-media'), flash = $('#snap-flash'), hd = $('.top'), after = $('.home-foot') || $('#snap').nextElementSibling;
   const rail = $('.rail'), fill = $('.rail .fill'), cam = $('.rail .cam'), nextEl = $('.rail .next'), chip = $('#snap-chip');
   const ticks = [...document.querySelectorAll('.rail a')];
   if (matchMedia('(pointer: coarse)').matches) $('#snap-cue').textContent = 'SWIPE UP';
@@ -413,7 +414,7 @@
     const tn = now();
     const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? innerHeight : 1;
     let dy = e.deltaY * unit;
-    if (Math.abs(e.deltaX * unit) > Math.abs(dy)) dy = 0;
+    if (Math.abs(e.deltaX * unit) > Math.abs(dy)) { if (e.target.closest && e.target.closest('.snapfilm .cards')) return; dy = 0; }
     const a = Math.abs(dy), d = Math.sign(dy);
     const gap = tn - G.last;
     const turned = d !== 0 && G.dir !== 0 && d !== G.dir;
@@ -534,8 +535,7 @@
   // the rail: ticks 0..3 are stops 1..4 on the film, tick 4 is the finale after it
   ticks.forEach((a, k) => a.addEventListener('click', (e) => {
     e.preventDefault();
-    if (k < LAST) goTo(k + 1);
-    else { if (S.mode !== 'idle') arrive(true); release(); }
+    goTo(k + 1);
   }));
 
   /* ---------- drawing ---------- */
@@ -603,7 +603,14 @@
       for (let i = 0; i < N; i++) if (i !== A && i !== B) alpha[i] = 0;
       stills.forEach((el, i) => { if (el._tf && i !== A && i !== B) { el.style.transform = ''; el.style.filter = ''; el._tf = false; } });
       if (S.fade) { alpha[A] = 1 - p; alpha[B] = p; flash.style.opacity = '0'; }
-      else {
+      else if (SEGS[k].name === 'fin') {
+        // as the stations' road did: the last frame pushes in like a photo while the wall fades over it
+        const e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        alpha[A] = 1; alpha[B] = clamp((p - .18) / .64, 0, 1);
+        stills[A].style.transform = `scale(${(1 + .07 * e).toFixed(4)})`; stills[A]._tf = true;
+        stills[B].style.transform = `scale(${(1.08 - .08 * e).toFixed(4)})`; stills[B]._tf = true;
+        flash.style.opacity = '0';
+      } else {
         // into the brightest point at the centre, white, then out of it into the next place
         if (p < 0.5) {
           const q = p / 0.5, e = q * q;
@@ -661,25 +668,28 @@
   }
 
   // the frame on screen, the light it is in (masthead, rail and scrims follow it), and where the rail's camera stands
-  function frameNow() { return S.mode === 'idle' ? STOP_F[S.at] : Math.round(STOP_F[S.k] + clamp(S.t / SEGS[S.k].dur, 0, 1) * (STOP_F[S.k + 1] - STOP_F[S.k])); }
+  function frameNow() { return S.mode === 'idle' || S.k >= LAST - 1 ? STOP_F[S.mode === 'idle' ? S.at : LAST] : Math.round(STOP_F[S.k] + clamp(S.t / SEGS[S.k].dur, 0, 1) * (STOP_F[S.k + 1] - STOP_F[S.k])); }
   function drawRail() {
     const vh = film.offsetHeight, past = scrollY > 2;
     let pos, cur = -1, next = '';
-    if (past) { pos = LAST - 1 + clamp(scrollY / Math.max(1, vh - 80), 0, 1); if (pos >= LAST - 0.02) cur = LAST; else next = after.dataset.next || ''; }
+    if (past) { pos = LAST - 1; cur = LAST - 1; }
     else if (S.mode === 'idle') { pos = Math.max(0, S.at - 1); cur = S.at > 0 ? S.at - 1 : -1; }
     else {
       pos = Math.max(0, S.k + clamp(S.t / SEGS[S.k].dur, 0, 1) - 1);
       const to = S.mode === 'play' ? (S.dir > 0 ? S.k + 1 : S.k) : (S.t / SEGS[S.k].dur >= 0.5 ? S.k + 1 : S.k);
       if (to > 0) next = copies[to].dataset.next || '';
     }
-    const x = (clamp(pos / LAST, 0, 1) * 100).toFixed(3) + '%';
+    const x = (clamp(pos / (ticks.length - 1), 0, 1) * 100).toFixed(3) + '%';
     if (cam._x !== x) { cam.style.left = x; fill.style.width = x; cam._x = x; }
     ticks.forEach((a, k) => a.classList.toggle('cur', k === cur));
     if (next && nextEl._n !== next) { nextEl.innerHTML = next; nextEl._n = next; }
     root.classList.toggle('moving', !!next);
     root.classList.toggle('at-top', !past && S.mode === 'idle' && S.at === 0);
     root.classList.toggle('past', scrollY > vh - 120);
-    const day = past ? true : dayAt(frameNow());
+    const onFin = S.mode === 'idle' ? S.at === LAST : S.k === LAST - 1;
+    const day = past || onFin || dayAt(frameNow());
+    film.classList.toggle('atfin', S.mode === 'idle' && S.at === LAST);
+    finWatch();
     if (hd._day !== day) { hd._day = day; hd.classList.toggle('t-day', day); rail.classList.toggle('t-day', day); film.classList.toggle('day', day); }
     film.classList.toggle('hold', !past && S.mode === 'idle');
     film.classList.toggle('at0', S.mode === 'idle' && S.at === 0);
@@ -726,6 +736,69 @@
   }
   addEventListener('scroll', onScroll, { passive: true });
 
+  const mosaic = film.querySelector('.finwall .mosaic'), tiles = mosaic ? [...mosaic.querySelectorAll('li')] : [];
+  const COLS = mosaic ? (+getComputedStyle(mosaic).getPropertyValue('--cols') || 22) : 22;
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;   // fixed sequence: the same wall every visit (as home.js)
+  tiles.forEach((li, i) => {
+    const c = i % COLS, we = li.classList.contains('w');
+    li._a = we ? .3 + .42 * (c - 10) / 9 + .03 * rnd() : .03 + .4 * rnd();   // when it lights
+    li._b = we ? 9 : li._a + .14 + .12 * rnd();                               // when it goes quiet again (never, for WE)
+    li._on = false;
+  });
+  const finCount = copies[copies.length - 1].querySelector('.meta b'), finTotal = finCount ? +finCount.textContent.replace(/\D/g, '') : 0;
+  const FIN_MS = 4200;
+  let finP = -1, finT0 = 0, finRaf = 0, finPlayed = false;
+  function finale(p) {
+    if (p === finP || !mosaic) return; finP = p;
+    tiles.forEach((li) => { const on = p >= li._a && p < li._b; if (on !== li._on) { li._on = on; li.classList.toggle('on', on); } });
+    mosaic.classList.toggle('formed', p >= .8);
+    if (finCount) finCount.textContent = Math.round(finTotal * (1 - Math.pow(1 - Math.min(1, p / .78), 3))).toLocaleString('ko-KR');
+  }
+  function finRun() { const p = Math.min(1, (now() - finT0) / FIN_MS); finale(p); finRaf = p < 1 ? requestAnimationFrame(finRun) : 0; }
+  function finWatch() {                                   // plays once each time the film comes to rest on 집
+    const atFin = S.mode === 'idle' && S.at === LAST;
+    if (atFin && !finPlayed) { finPlayed = true; finT0 = now(); finale(0); cancelAnimationFrame(finRaf); finRaf = requestAnimationFrame(finRun); }
+    else if (finPlayed && S.mode === 'idle' && S.at < LAST) { finPlayed = false; cancelAnimationFrame(finRaf); finRaf = 0; finale(0); }
+  }
+  finale(0);
+
+  function fitCopies() {
+    const wide = !matchMedia('(max-aspect-ratio: 1/1)').matches;
+    const ft = film.getBoundingClientRect().top;
+    const railTop = rail.getBoundingClientRect().top - ft, headBot = hd.getBoundingClientRect().bottom - ft;
+    const minF = wide ? (innerHeight < 800 ? .64 : .78) : .84;
+    copies.forEach((c) => {
+      if (c.classList.contains('hero')) return;
+      c.style.removeProperty('--u'); c.classList.remove('row', 'nodesc', 'nocards', 'nocredit');
+      const low = wide ? c.dataset.dpos === 'bottom' : c.dataset.pos === 'bottom';
+      const key = !wide && c.dataset.i === String(LAST) && film.querySelector('.finwall .key');
+      const ceil = key ? key.getBoundingClientRect().bottom - ft : headBot;
+      const over = () => { const r = c.getBoundingClientRect(); return low ? (ceil + 8) - (r.top - ft) : (r.bottom - ft) - (railTop - 14); };
+      const shrink = () => {
+        let f = 1;
+        for (let k = 0; k < 6; k++) {
+          const o = over(); if (o <= 0) return true;
+          f = Math.max(minF, f * (1 - o / c.offsetHeight) - .01);
+          c.style.setProperty('--u', `calc(var(--u0) * ${f.toFixed(3)})`);
+          if (f === minF) return over() <= 0;
+        }
+        return over() <= 0;
+      };
+      if (shrink()) return;
+      if (c.querySelector('.cards')) { c.style.removeProperty('--u'); c.classList.add('row'); if (shrink()) return; }
+      if (c.querySelector('.credit')) { c.style.removeProperty('--u'); c.classList.add('nocredit'); if (shrink()) return; }   // 집 on a small phone: the fine print goes first
+      c.classList.add('nodesc'); if (shrink()) return;
+      // a short landscape phone (about 390 px tall): smaller still, and last the thumbnails give way to the words
+      const f0 = minF; let f = f0;
+      while (over() > 0 && f > .5) { f = Math.max(.5, f - .04); c.style.setProperty('--u', `calc(var(--u0) * ${f.toFixed(3)})`); }
+      if (over() > 0) { c.classList.add('nocards'); c.style.removeProperty('--u'); shrink(); }
+    });
+  }
+  addEventListener('resize', () => { clearTimeout(fitCopies._t); fitCopies._t = setTimeout(fitCopies, 120); });
+  addEventListener('load', fitCopies);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitCopies);
+
   function reloadMedia() {
     TT.engaged = false; G.state = 'done';
     if (S.mode !== 'idle') { S.target = S.mode === 'scrub' ? S.origin : S.target; arrive(true); }
@@ -742,6 +815,6 @@
   });
 
   scrollTo(0, 0);
-  updateUI(); onScroll(); publish();
+  updateUI(); onScroll(); fitCopies(); publish();
   loadMedia();
 })();

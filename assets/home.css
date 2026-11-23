@@ -171,7 +171,7 @@ html.film.at-top .top.t-day::before{opacity:.45}   /* on the lawn the band stays
 
 /* ================= stack ================= */
 html:not(.film) .stop{padding-bottom:calc(var(--u)*72)}
-html:not(.film) #s1 .bg{object-position:20% 50%}
+html:not(.film) #s1 .bg{object-position:35% 50%}   /* WE ACT! on the back a little left of centre, the second crew member still in at the right */
 html:not(.film) .stop::before{inset:0 0 auto 0; height:auto; aspect-ratio:16/9; background:
   linear-gradient(0deg, rgba(var(--sc),1) 0%, rgba(var(--sc),0) 42%), linear-gradient(180deg, rgba(var(--sc),.8) 0%, rgba(var(--sc),0) 26%)}
 html:not(.film) .stop .ov{padding:0 var(--lx); margin-top:calc(var(--u)*-36); max-width:calc(var(--u)*760 + 32px)}

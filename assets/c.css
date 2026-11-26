@@ -1,55 +1,69 @@
-/* C안 home (index-c.html): a film at the top, the numbers under it, the 3D take looping behind changing words,
-   then photo and film sections that grow lighter towards 집 (night → day, like the F moodboard). Rail on the right. */
+/* C안 home (index-c.html, confirmed 2026-11-26): a film at the top, the numbers under it, 현장 and 구조 over the 3D take,
+   then split photo sections, cards, 입양 and 집 (A's WE wall), lighter towards 집 (night → day). Rail on the right.
+   The 1440 px column on wide screens is site.css's (html[data-v="c"]). */
 .chome{--ink-c:#031b1f; --mint:#80d0c7}
 .chome .rule{display:block; width:calc(var(--u)*120); height:2px; background:var(--mint); margin:0 0 calc(var(--u)*20)}
 .chome .kick{margin:0 0 10px; font:700 max(12px, calc(var(--u)*12.5))/1.3 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--mint)}
-.chome h2{margin:0; font:300 max(32px, calc(var(--u)*52))/1.12 var(--display); letter-spacing:-.03em; color:var(--mint)}
+.chome h2{margin:0; font:300 max(30px, calc(var(--u)*50))/1.16 var(--display); letter-spacing:-.03em; color:var(--mint); text-wrap:balance}
 .chome h2 b{font-weight:800}
-.chome h2 .n{margin-right:.35em; font-weight:200; opacity:.8}
 .chome .lede{margin:calc(var(--u)*18) 0 0; font:700 max(18px, calc(var(--u)*22))/1.45 var(--display); letter-spacing:-.02em; color:#fff}
-.chome .desc{margin:calc(var(--u)*10) 0 0; max-width:34em; font-size:max(15px, calc(var(--u)*16)); line-height:1.8; color:rgba(255,255,255,.8)}
-.chome .btns{margin-top:calc(var(--u)*26)}
+.chome .desc{margin:calc(var(--u)*12) 0 0; max-width:34em; font-size:max(15px, calc(var(--u)*16)); line-height:1.8; color:rgba(255,255,255,.8)}
+.chome .btns{margin-top:calc(var(--u)*28)}
 .chome .btn.ghost{background:none; border-color:rgba(255,255,255,.5); color:#fff}
 .chome .btn.ghost:hover{border-color:#fff}
 .chome video.bg,.chome .stick video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
 .chome .shade{position:absolute; inset:0; pointer-events:none}
 
-/* ---- 1 · the film at the top ---- */
+/* ---- 1 · the film at the top: the line and two buttons, nothing else ---- */
 .c-hero{position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:flex-end; overflow:hidden; background:var(--ink-c); color:#fff}
 .c-hero .shade{background:linear-gradient(0deg, rgba(3,27,31,.94) 0%, rgba(3,27,31,.72) 30%, rgba(3,27,31,.3) 58%, rgba(3,27,31,.08) 80%), linear-gradient(180deg, rgba(3,27,31,.6) 0%, rgba(3,27,31,0) 22%)}
-.c-hero .in{position:relative; padding-bottom:calc(var(--u)*110); width:100%}
-.c-hero h1{margin:0; max-width:15em; font:300 max(34px, calc(var(--u)*62))/1.14 var(--display); letter-spacing:-.035em}
+.c-hero .in{position:relative; padding-bottom:calc(var(--u)*96); width:100%}
+.c-hero h1{margin:0; font:300 max(34px, calc(var(--u)*62))/1.16 var(--display); letter-spacing:-.035em}
 .c-hero h1 b{font-weight:800; color:var(--mint)}
-.c-hero .cue{position:absolute; left:var(--lx); bottom:calc(var(--u)*30); margin:0; font-size:11px; letter-spacing:.3em; color:rgba(255,255,255,.7)}
+.c-hero h1 br.mo{display:none}
+.c-hero .btns{margin-top:calc(var(--u)*34)}
 
 /* ---- 2 · the band of numbers right under it ---- */
-.c-band{background:var(--ink-c); color:#fff; padding:calc(var(--u)*56) 0 calc(var(--u)*60)}
+.c-band{background:var(--ink-c); color:#fff; padding:calc(var(--u)*56) 0 calc(var(--u)*64)}
 .c-band .wrap{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:calc(var(--u)*56)}
 .c-band div div{padding-top:calc(var(--u)*26); border-top:2px solid var(--mint); text-align:center}
 .c-band b{display:block; font:800 max(44px, calc(var(--u)*72))/1 var(--display); letter-spacing:-.04em; color:var(--mint); font-variant-numeric:tabular-nums}
 .c-band span{display:block; margin-top:calc(var(--u)*12); font:700 max(14px, calc(var(--u)*16))/1.4 var(--display); color:rgba(255,255,255,.86)}
 
-/* ---- 3 · the 3D take loops; only the words on the left change ---- */
-.c-pin{position:relative; height:calc(var(--n) * 100vh + 100vh); background:var(--ink-c)}
-.c-pin .stick{position:sticky; top:0; height:100vh; overflow:hidden}
-.c-pin .shade{background:linear-gradient(90deg, rgba(3,27,31,.9) 0%, rgba(3,27,31,.66) 30%, rgba(3,27,31,.12) 56%, rgba(3,27,31,0) 70%), linear-gradient(180deg, rgba(3,27,31,.6) 0%, rgba(3,27,31,0) 20%)}
-.c-pin .steps{position:relative; height:100%}
-.step{position:absolute; left:var(--lx); top:50%; width:min(calc(var(--u)*520), 86vw); translate:0 calc(-50% + 24px); opacity:0; pointer-events:none; transition:opacity .6s var(--ease), translate .6s var(--ease)}
-.step.on{opacity:1; translate:0 -50%; pointer-events:auto}
-.c-news{list-style:none; margin:calc(var(--u)*22) 0 14px; padding:0; border-top:1px solid rgba(255,255,255,.2)}
-.c-news a{display:flex; justify-content:space-between; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.2); color:#fff; text-decoration:none}
-.c-news a:hover span{color:var(--mint)}
-.c-news span{font:700 15.5px/1.45 var(--display)} .c-news small{flex:none; font-size:12.5px; color:rgba(255,255,255,.6); font-variant-numeric:tabular-nums}
-.c-pin .lnk{color:#fff; border-color:rgba(255,255,255,.4)}
+/* ---- 3 · 현장 and 구조: the take stays (sticky) while the two blocks of words scroll over it in the page's own flow.
+   Nothing changes by itself and nothing jumps: each block only fades with its distance from the middle (c.js --o). ---- */
+.c-pin{position:relative; background:var(--ink-c)}
+.c-pin .stick{position:sticky; top:0; height:100vh; height:100svh; overflow:hidden; background:var(--ink-c)}
+.c-pin .shade{background:linear-gradient(90deg, rgba(3,27,31,.9) 0%, rgba(3,27,31,.66) 30%, rgba(3,27,31,.12) 56%, rgba(3,27,31,0) 70%), linear-gradient(180deg, rgba(3,27,31,.6) 0%, rgba(3,27,31,0) 20%),
+  linear-gradient(0deg, rgba(3,27,31,.92) 0%, rgba(3,27,31,0) 18%)}
+.c-pin .steps{position:relative; z-index:1; margin-top:-100vh; margin-top:-100svh}
+.c-pin .step{display:flex; align-items:center; min-height:100vh; min-height:100svh}
+.c-pin .step .in{width:min(calc(var(--u)*600), 86vw); opacity:var(--o, 1); will-change:opacity}
+.c-pin h2{font-size:max(30px, calc(var(--u)*44)); line-height:1.26; color:#fff; text-wrap:initial}
+.c-pin h2 b{color:var(--mint)}
+.c-pin .desc{margin-top:calc(var(--u)*18); max-width:30em}
 
-/* ---- 4 · photo sections, lighter as you go ---- */
-.c-split{position:relative; padding:calc(var(--u)*130) 0; color:#fff; background:linear-gradient(180deg, #031b1f 0%, #062e33 100%)}
+/* ---- 4 · split sections: 구조 소식 and 치료와 임시보호 (a pair, the picture swapping sides), then 입양 ---- */
+.c-split{position:relative; padding:calc(var(--u)*120) 0; color:#fff}
 .c-split .grid{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:calc(var(--u)*72); align-items:center}
+.c-split .grid.rev{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
 .c-split .grid.rev figure{order:2}
-.c-split figure{margin:0; aspect-ratio:4/3; overflow:hidden}
+.c-split figure{margin:0; aspect-ratio:4/3; overflow:hidden; background:var(--teal-800)}
 .c-split figure img{width:100%; height:100%; object-fit:cover}
+#c-news{padding-bottom:calc(var(--u)*64); background:linear-gradient(180deg, #031b1f 0%, #042429 100%)}
+#c-care{padding-top:calc(var(--u)*64); background:linear-gradient(180deg, #042429 0%, #062e33 100%)}
+.c-news{list-style:none; margin:calc(var(--u)*26) 0 0; padding:0; border-top:1px solid rgba(255,255,255,.18)}
+.c-news a{display:grid; grid-template-columns:calc(var(--u)*60) minmax(0,1fr) auto; align-items:center; gap:calc(var(--u)*18);
+  padding:calc(var(--u)*12) 0; border-bottom:1px solid rgba(255,255,255,.18); color:#fff; text-decoration:none}
+.c-news img{width:100%; aspect-ratio:1; object-fit:cover; min-width:44px; filter:saturate(.85); transition:filter .3s}
+.c-news span{font:700 max(15px, calc(var(--u)*16))/1.45 var(--display); letter-spacing:-.01em; transition:color .16s}
+.c-news small{font-size:max(12.5px, calc(var(--u)*13)); color:rgba(255,255,255,.6); font-variant-numeric:tabular-nums; white-space:nowrap}
+.c-news a:hover span,.c-news a:focus-visible span{color:var(--mint)}
+.c-news a:hover img{filter:none}
+
+/* ---- 5 · film and photo cards ---- */
 .c-cards{padding:calc(var(--u)*120) 0 calc(var(--u)*130); color:#fff; background:linear-gradient(180deg, #062e33 0%, #0a3f45 100%)}
-.c-ways{padding:calc(var(--u)*110) 0 calc(var(--u)*170); color:#fff; background:linear-gradient(180deg, #0a3f45 0%, #1b5e64 72%, #cfe1df 100%)}
+.c-ways{padding:calc(var(--u)*110) 0 calc(var(--u)*120); color:#fff; background:linear-gradient(180deg, #0a3f45 0%, #134f55 100%)}
 .c-head{max-width:calc(var(--u)*720); margin:0 auto calc(var(--u)*56); text-align:center}
 .c-head .rule{margin:0 auto calc(var(--u)*20)}
 .c-head p{margin:calc(var(--u)*16) auto 0; max-width:36em; font-size:max(15px, calc(var(--u)*16.5)); line-height:1.75; color:rgba(255,255,255,.82)}
@@ -63,25 +77,61 @@
 .cap small{display:block; margin-top:8px; font-size:14px; line-height:1.6; color:rgba(255,255,255,.82)}
 .cap .more{display:flex; align-items:center; gap:10px; margin-top:calc(var(--u)*16); padding-top:calc(var(--u)*14); border-top:1px solid rgba(255,255,255,.28); font:700 14px/1 var(--display)}
 .cap .more::before{content:""; width:28px; height:28px; border-radius:50%; background:var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8h9M8.5 4.5 12 8l-3.5 3.5' fill='none' stroke='%23031b1f' stroke-width='1.6'/%3E%3C/svg%3E") center/14px no-repeat}
-.c-split.light{color:var(--teal-900); background:linear-gradient(180deg, #cfe1df 0%, #eef3f4 100%)}
-.c-split.light h2,.c-fin h2{color:var(--key)}
-.c-split.light .kick,.c-fin .kick{color:var(--key)}
-.c-split.light .rule,.c-fin .rule{background:var(--key)}
+/* night turns to day after the ways, under 입양, not behind the cards */
+.c-split.light{padding-top:calc(var(--u)*150); color:var(--teal-900); background:linear-gradient(180deg, #134f55 0%, #6f9fa0 9%, #cfe1df 24%, #eef3f4 100%)}
+.c-split.light h2,.c-split.light .kick{color:var(--key)}
+.c-split.light .rule{background:var(--key)}
 .c-split.light .lede{color:var(--teal-900)} .c-split.light .desc{color:rgba(6,46,51,.75)}
-.c-split.light .btn.ghost{border-color:var(--ln-2); color:var(--teal-900)}
-.cards.dogs.four{grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px}
+.c-split.light .btn:not(.pri){background:none; border-color:var(--ln-2); color:var(--teal-900)}
+.c-split.light .card .nm{color:var(--teal-900)}
+.cards.dogs.four{grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin-top:calc(var(--u)*24)}
 .cards.dogs.four .pic{aspect-ratio:1}
 .cards.dogs.four .sub,.cards.dogs.four .t{display:none}
-.c-fin{padding:calc(var(--u)*140) 0 calc(var(--u)*150); background:linear-gradient(180deg, #eef3f4 0%, #f6f8f7 100%); color:var(--teal-900); text-align:center}
-.c-fin .rule{margin:0 auto calc(var(--u)*20)}
-.c-fin h2{font-size:max(32px, calc(var(--u)*56))}
-.c-fin p{margin:calc(var(--u)*16) auto 0; max-width:32em; color:rgba(6,46,51,.75); line-height:1.75}
-.c-fin .btns{justify-content:center}
-.c-fin .btn:not(.pri),.c-split.light .btn:not(.pri){background:none; border-color:var(--ln-2); color:var(--teal-900)}
-.c-split.light .card .nm{color:var(--teal-900)}
 
-/* ---- the 현장 › 집 rail, upright on the right ---- */
-.c-rail{position:fixed; z-index:28; right:calc(var(--u)*30); top:50%; height:min(46vh, 380px); width:60px; translate:0 -50%; color:#fff; transition:opacity .4s, color .4s}
+/* ---- 6 · 집: A's wall. 22×12 squares, one rescued child each, cover the section; the grey picture is one layer (the film's
+   atlas), each child a square that lights over it (opacity only), and WE (33 squares) settles into act teal. ---- */
+.c-fin{position:relative; height:100vh; height:100svh; min-height:600px; overflow:hidden; background:var(--mist); color:var(--teal-900)}
+.c-wall{position:absolute; z-index:0; left:50%; top:50%; width:max(100vw, calc(max(100svh, 600px) * 22 / 12)); aspect-ratio:22/12; translate:-50% -50%}
+.c-wall .base,.c-wall ul,.c-wall .lines,.c-wall .glow{position:absolute; inset:0}
+.c-wall .base{background:0 0/100% 100% no-repeat; filter:grayscale(1); opacity:.2; transition:opacity 1.2s var(--ease)}
+.c-wall ul{display:grid; grid-template-columns:repeat(22, minmax(0,1fr)); grid-template-rows:repeat(12, minmax(0,1fr)); margin:0; padding:0; list-style:none}
+.c-wall li{position:relative; opacity:0; transition:opacity .9s var(--ease);
+  background:no-repeat calc(var(--x) * 100% / 21) calc(var(--y) * 100% / 11) / 2200% 1200%}
+.c-wall.near .base,.c-wall.near li{background-image:url(../media/film/wall.webp?v=1)}   /* fetched once the section is near */
+.c-wall li.on{opacity:.92}
+.c-wall li.w.on{opacity:1}
+/* WE settles into act teal: a grey copy of the picture (::before) times the teal (::after). Each is its own box, so the
+   grey filter does not reach the teal (on the square itself it greyed both) */
+.c-wall li.w::before,.c-wall li.w::after{content:""; position:absolute; inset:0; opacity:0; transition:opacity 1.2s var(--ease)}
+.c-wall.near li.w::before{background:inherit; background-image:url(../media/film/wall.webp?v=1); filter:grayscale(1) brightness(1.12) contrast(1.05)}
+.c-wall li.w::after{background:var(--key); mix-blend-mode:multiply}
+.c-wall.formed .base{opacity:.09}
+.c-wall.formed li.w::before,.c-wall.formed li.w::after{opacity:1}
+.c-wall .lines{background:linear-gradient(90deg, var(--mist) 2px, transparent 2px) 0 0/calc(100% / 22) 100%,
+  linear-gradient(180deg, var(--mist) 2px, transparent 2px) 0 0/100% calc(100% / 12)}
+.c-wall .glow{opacity:0; transition:opacity 1.6s var(--ease); background:radial-gradient(40% 56% at 69% 46%, rgba(233,180,124,.2), rgba(233,180,124,0) 72%)}
+.c-wall.formed .glow{opacity:1}
+/* the morning mist from the left under the words, measured from the column, not the screen's edge */
+.c-fin .veil{position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(90deg, rgba(246,248,247,.95) 0, rgba(238,243,244,.9) calc(var(--lx) + var(--u)*380), rgba(219,232,231,.55) calc(var(--lx) + var(--u)*470), rgba(219,232,231,0) calc(var(--lx) + var(--u)*560)),
+    linear-gradient(180deg, rgba(246,248,247,.75) 0%, rgba(246,248,247,0) 16%)}
+.c-fin .wrap{position:relative; z-index:2; height:100%; display:flex; align-items:center}
+.c-fin .tx{width:max(320px, calc(var(--u)*440)); padding-top:calc(var(--u)*40)}
+.c-fin .rule{background:var(--key)}
+.c-fin .kick{color:var(--key)}
+.c-fin h2{font-weight:800; font-size:max(30px, calc(var(--u)*46)); line-height:1.2; color:var(--teal-900)}
+.c-fin h2 .we{font-weight:900; color:var(--key)}
+.c-fin .desc{color:rgba(6,46,51,.78)}
+.c-fin .btn:not(.pri){background:none; border-color:var(--ln-2); color:var(--teal-900)}
+.c-fin .key{position:absolute; z-index:2; right:var(--rx); bottom:calc(var(--u)*28); display:flex; align-items:center; gap:10px; margin:0; padding:7px 12px;
+  background:rgba(246,248,247,.86); font-size:max(12px, calc(var(--u)*12)); letter-spacing:.02em; color:rgba(6,46,51,.76); white-space:nowrap; opacity:0; transition:opacity .8s var(--ease) .3s}
+.c-fin.formed .key{opacity:1}
+.c-fin .key i{width:max(9px, calc(var(--u)*9)); height:max(9px, calc(var(--u)*9)); background:var(--teal-300)}
+.c-fin .key span{opacity:.5}
+.c-fin .key b{font:800 max(12px, calc(var(--u)*12))/1 var(--display); letter-spacing:.08em; color:var(--key)}
+
+/* ---- the 현장 › 집 rail, upright at the right edge of the column ---- */
+.c-rail{position:fixed; z-index:28; right:max(10px, calc(var(--rx) - 62px)); top:50%; height:min(46vh, 380px); width:60px; translate:0 -50%; color:#fff; transition:opacity .4s, color .4s}
 .c-rail.day{color:var(--teal-900)}
 .c-rail.off{opacity:0; pointer-events:none}
 .c-rail .line,.c-rail .fill{position:absolute; right:6px; top:0; width:1px; height:100%; background:currentColor; opacity:.3}
@@ -96,27 +146,53 @@
 .c-rail.day .cam{background:var(--key); box-shadow:0 0 0 4px rgba(11,110,120,.18)}
 
 @media (max-width:1023px){
-  .c-hero .in{padding-bottom:84px}
-  .c-hero h1{font-size:34px; line-height:1.25}
-  html[lang="en"] .c-hero h1 br{display:none}   /* the desktop break leaves 'animals' alone on a phone: let the line fall where it fits */
+  .c-hero .in{padding-bottom:64px}
+  .c-hero h1{font-size:34px; line-height:1.26}
+  .c-hero h1 br.mo{display:inline}
+  .c-hero h1 br.pc{display:none}
   html[lang="en"] .c-hero h1{text-wrap:balance}
+  .c-hero .btns{margin-top:26px}
   .chome h2{font-size:30px}
   .c-band b{font-size:46px}
   .c-band .wrap{grid-template-columns:1fr; gap:26px}
   .c-pin .shade{background:linear-gradient(0deg, rgba(3,27,31,.92) 0%, rgba(3,27,31,.55) 50%, rgba(3,27,31,.2) 100%)}
-  .step{left:16px; right:16px; width:auto; top:auto; bottom:48px; translate:0 24px}
-  .step.on{translate:0 0}
+  .c-pin .step{align-items:flex-end; padding-bottom:48px}
+  .c-pin .step .in{width:auto}
+  .c-pin h2{font-size:25px; letter-spacing:-.035em}
   .c-split{padding:72px 0}
-  .c-split .grid{grid-template-columns:1fr; gap:28px}
+  #c-news{padding-bottom:40px} #c-care{padding-top:40px}
+  .c-split .grid,.c-split .grid.rev{grid-template-columns:1fr; gap:28px}
   .c-split .grid.rev figure{order:0}
-  .vcards{grid-auto-flow:column; grid-template-columns:none; grid-auto-columns:78%; overflow-x:auto; scroll-snap-type:x mandatory; margin:0 -16px; padding:0 16px}
+  .c-split.light{padding-top:96px}
+  .vcards{grid-auto-flow:column; grid-template-columns:none; grid-auto-columns:78%; overflow-x:auto; scroll-snap-type:x mandatory; margin:0 -16px; padding:0 16px; scrollbar-width:none}
+  .vcards::-webkit-scrollbar{display:none}
   .vcards li{scroll-snap-align:start}
   .cards.dogs.four{grid-template-columns:repeat(2, minmax(0,1fr))}
   .c-rail{display:none}
+  /* 집 on a phone: WE (columns 10–19, rows 2–8) across the top, squares 1/11 of the width, the legend under it, then the words */
+  .c-fin{--tw:calc(100vw / 11); height:auto; min-height:0; padding:calc(var(--tw) * 7.6 + 92px) 0 64px}
+  .c-wall{left:calc(50vw - var(--tw) * 15); top:calc(var(--tw) * -1.4); width:calc(var(--tw) * 22); translate:none}
+  .c-wall .lines{background:linear-gradient(90deg, var(--mist) 1px, transparent 1px) 0 0/calc(100% / 22) 100%,
+    linear-gradient(180deg, var(--mist) 1px, transparent 1px) 0 0/100% calc(100% / 12)}
+  .c-fin .veil{background:linear-gradient(180deg, rgba(238,243,244,0) calc(var(--tw) * 7.4), rgba(238,243,244,.94) calc(var(--tw) * 8.6), var(--mist) calc(var(--tw) * 9.6))}
+  /* the legend in two lines: what a square is, then what WE is (the · between them becomes the break) */
+  .c-fin .key{right:auto; left:16px; bottom:auto; top:calc(var(--tw) * 7.6 + 12px); display:block; white-space:normal; max-width:calc(100vw - 32px); font-size:12px; line-height:1.9}
+  .c-fin .key i{display:inline-block; margin-right:8px; vertical-align:-1px}
+  .c-fin .key span{display:block; height:0; overflow:hidden}
+  .c-fin .key b{margin:0 6px 0 17px}
+  .c-fin .wrap{height:auto; display:block}
+  .c-fin .tx{width:auto; padding-top:0}
+  .c-fin h2{font-size:30px}
 }
-/* a phone held upright would show only the middle quarter of the 16:9 take (the WE ACT! on the back cut in half):
-   there it is a window at the top, about half the frame wide, and the words stand below it on the night */
+/* a phone held upright would show only the middle quarter of the 16:9 take (the WE ACT! on the back cut in half): there
+   the take is a window at the top that stays while the words scroll up under its lower edge, like any page */
 @media (max-width:1023px) and (orientation:portrait){
-  .c-pin .stick video{inset:0 0 auto 0; height:58vh}
-  .c-pin .shade{background:linear-gradient(180deg, rgba(3,27,31,.55) 0, rgba(3,27,31,0) 14vh, rgba(3,27,31,0) 34vh, rgba(3,27,31,.72) 48vh, rgba(3,27,31,.96) 56vh, #031b1f 58vh)}
+  .c-pin .stick{z-index:2; height:58vh; height:58svh}
+  .c-pin .shade{background:linear-gradient(180deg, rgba(3,27,31,.5) 0, rgba(3,27,31,0) 22%, rgba(3,27,31,0) 64%, rgba(3,27,31,.8) 88%, #031b1f 100%)}
+  .c-pin .steps{margin-top:0}
+  .c-pin .step{display:block; min-height:0; padding:28px 0 6svh}
+  .c-pin .step .in{opacity:1}
+}
+@media (prefers-reduced-motion: reduce){
+  .c-wall li,.c-wall .base,.c-wall li.w::after,.c-wall .glow,.c-fin .key{transition:none}
 }

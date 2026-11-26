@@ -69,6 +69,11 @@ input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
 html{--u:1px; --lx:16px; --rx:16px; --rc:100%; color-scheme:dark; scroll-padding-top:96px; font-synthesis-style:none}
 @media (min-width:1024px) and (min-height:560px){
   html{--u:clamp(.8px, min(100vw / 1280, 100vh / 720), 2px); --lx:calc(var(--u)*64); --rx:calc(var(--u)*64); --rc:calc(var(--u)*258)}
+  /* C (confirmed 2026-11-26: '해상도 높은 모니터에선 내용들이 과하게 크게 보입니다. 컨테이너를 1440px 정도로'): the frame
+     scale stops where a 1440 px screen puts it, and past that the content keeps to a 1440 px column in the middle (the
+     masthead with it); pictures and colour bands still run edge to edge */
+  html[data-v="c"]{--u:clamp(.8px, min(100vw / 1280, 100vh / 720), 1.125px);
+    --lx:max(calc(var(--u)*64), calc((100vw - 1440px) / 2)); --rx:var(--lx)}
 }
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0; background:var(--bg); color:var(--fg);

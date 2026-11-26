@@ -42,7 +42,6 @@
 .c-pin h2{font-size:max(30px, calc(var(--u)*44)); line-height:1.26; color:#fff; text-wrap:initial}
 .c-pin h2 b{color:var(--mint)}
 .c-pin .desc{margin-top:calc(var(--u)*18); max-width:30em}
-.c-pin .step .mo{display:none}
 
 /* ---- 4 · split sections: 구조 소식 and 치료와 임시보호 (a pair, the picture swapping sides), then 입양 ---- */
 .c-split{position:relative; padding:calc(var(--u)*120) 0; color:#fff}
@@ -65,7 +64,19 @@
 /* ---- 5 · film and photo cards ---- */
 /* 현장의 기록 closes the 현장 · 구조 group: straight under the take, on the same night */
 .c-cards{padding:calc(var(--u)*96) 0 calc(var(--u)*130); color:#fff; background:linear-gradient(180deg, #031b1f 0%, #042429 100%)}
-.c-ways{padding:calc(var(--u)*110) 0 calc(var(--u)*120); color:#fff; background:linear-gradient(180deg, #073338 0%, #134f55 100%)}
+.c-ways{padding:calc(var(--u)*110) 0 calc(var(--u)*72); color:#fff; background:linear-gradient(180deg, #073338 0%, #0b3d43 100%)}
+
+/* ---- night → day: a long band of its own between the ways and 입양 (2026-11-26: '그라데이션 영역을 넓게, 자연스럽게, grain').
+   The stops are worked out in OKLab, where equal steps look equal (blending in sRGB passes through a dull green and the
+   eye sees a line), eased with smootherstep so neither end of the blend shows; a faint warm light rises in the lower
+   half, and a still grain lies over it all, faded in and out at the edges so the texture has no seam. ---- */
+.c-dawn{position:relative; height:clamp(320px, 72vh, 780px); overflow:hidden;
+  background:linear-gradient(180deg, #0b3d43 0%, #0c3d43 6.25%, #104046 12.5%, #18454b 18.75%, #254e53 25%, #365b60 31.25%, #4a6b70 37.5%, #617e82 43.75%, #7b9397 50%, #94a9ac 56.25%, #adbdc0 62.5%, #c3d0d2 68.75%, #d5dee0 75%, #e2e9eb 81.25%, #eaf0f1 87.5%, #edf3f4 93.75%, #eef3f4 100%)}
+.c-dawn .sun{position:absolute; left:50%; top:30%; width:150%; height:64%; translate:-50% 0; pointer-events:none;   /* wholly inside the band, so the light never meets an edge */
+  background:radial-gradient(closest-side, rgba(233,180,124,.17), rgba(233,180,124,.07) 52%, rgba(233,180,124,0))}
+.c-dawn::after{content:""; position:absolute; inset:0; pointer-events:none; background:url(grain.png) 0 0 / 192px 192px repeat;
+  mix-blend-mode:overlay; opacity:.42;
+  -webkit-mask:linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent); mask:linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent)}
 .c-head{max-width:calc(var(--u)*720); margin:0 auto calc(var(--u)*56); text-align:center}
 .c-head .rule{margin:0 auto calc(var(--u)*20)}
 .c-head p{margin:calc(var(--u)*16) auto 0; max-width:36em; font-size:max(15px, calc(var(--u)*16.5)); line-height:1.75; color:rgba(255,255,255,.82); text-wrap:balance}
@@ -80,12 +91,10 @@
 .cap small{display:block; margin-top:8px; font-size:14px; line-height:1.6; color:rgba(255,255,255,.82)}
 .cap .more{display:flex; align-items:center; gap:10px; margin-top:calc(var(--u)*16); padding-top:calc(var(--u)*14); border-top:1px solid rgba(255,255,255,.28); font:700 14px/1 var(--display)}
 .cap .more::before{content:""; width:28px; height:28px; border-radius:50%; background:var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8h9M8.5 4.5 12 8l-3.5 3.5' fill='none' stroke='%23031b1f' stroke-width='1.6'/%3E%3C/svg%3E") center/14px no-repeat}
-/* ---- 입양: night turns to day above it in the palette's own steps (teal-500, -300, -100, mist), so the blend never
-   passes through grey; then two levels — the story (the same split as 구조 소식 and 치료) and, under it across the
+/* ---- 입양 (day: the dawn band above has turned the night): two levels — the story (the same split as 구조 소식 and 치료) and, under it across the
    column, the dogs waiting now. The page body is t-night, so every colour here is written out, not taken from the
    night tokens (--ln-2 there is a light hairline: on this ground the second button had no edge at all). ---- */
-.c-split.light{padding:calc(var(--u)*230) 0 calc(var(--u)*130); color:#062e33;
-  background:linear-gradient(180deg, #134f55 0, #2c7378 calc(var(--u)*46), #8db8b7 calc(var(--u)*104), #dbe8e7 calc(var(--u)*152), #eef3f4 calc(var(--u)*196), #f3f6f5 100%)}
+.c-split.light{padding:calc(var(--u)*72) 0 calc(var(--u)*130); color:#062e33; background:linear-gradient(180deg, #eef3f4 0%, #f3f6f5 100%)}
 .c-split.light h2,.c-split.light .kick{color:var(--key)}
 .c-split.light .rule{background:var(--key)}
 .c-split.light .lede{color:#062e33} .c-split.light .desc{color:rgba(6,46,51,.74)}
@@ -178,7 +187,7 @@
   .c-band b{font-size:46px}
   .c-band .wrap{grid-template-columns:1fr; gap:26px}
   .c-pin .shade{background:linear-gradient(0deg, rgba(3,27,31,.92) 0%, rgba(3,27,31,.55) 50%, rgba(3,27,31,.2) 100%)}
-  .c-pin .step{align-items:flex-end; padding-bottom:48px}
+  .c-pin .step{align-items:flex-end; padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 72px)}
   .c-pin .step .in{width:auto}
   .c-pin h2{font-size:25px; letter-spacing:-.035em}
   .c-split{padding:72px 0}
@@ -192,7 +201,8 @@
   .vcards::-webkit-scrollbar{display:none}
   .vcards::after{content:""; flex:0 0 4px}
   .vcards li{flex:0 0 78%; scroll-snap-align:start}
-  .c-split.light{padding:150px 0 72px}
+  .c-split.light{padding:48px 0 72px}
+  .c-dawn{height:clamp(260px, 56svh, 520px)}
   .c-wait{margin-top:56px}
   .c-wait header{padding-top:22px}
   .c-wait h3{font-size:18px}
@@ -208,29 +218,16 @@
   .c-wall .lines{background:linear-gradient(90deg, var(--mist) 1px, transparent 1px) 0 0/calc(100% / 22) 100%,
     linear-gradient(180deg, var(--mist) 1px, transparent 1px) 0 0/100% calc(100% / 12)}
   .c-fin .veil{background:linear-gradient(180deg, rgba(238,243,244,0) calc(var(--tw) * 7.4), rgba(238,243,244,.94) calc(var(--tw) * 8.6), var(--mist) calc(var(--tw) * 9.6))}
-  /* the legend in two lines: what a square is, then what WE is (the · between them becomes the break) */
-  .c-fin .key{right:auto; left:16px; bottom:auto; top:calc(var(--tw) * 7.6 + 12px); display:block; white-space:normal; max-width:calc(100vw - 32px); font-size:12px; line-height:1.9}
-  .c-fin .key i{display:inline-block; margin-right:8px; vertical-align:-1px}
+  /* the legend, small and right-aligned under WE (2026-11-26: on the left it competed with the title below), in two lines:
+     what a square is, then what WE is (the · between them becomes the break) */
+  .c-fin .key{left:auto; right:16px; bottom:auto; top:calc(var(--tw) * 7.6 + 10px); display:block; padding:5px 9px; white-space:nowrap;
+    text-align:right; font-size:11px; line-height:1.75; letter-spacing:0; background:rgba(246,248,247,.72)}
+  .c-fin .key i{display:inline-block; width:7px; height:7px; margin-right:6px; vertical-align:0}
   .c-fin .key span{display:block; height:0; overflow:hidden}
-  .c-fin .key b{margin:0 6px 0 17px}
+  .c-fin .key b{margin-right:5px; font-size:11px}
   .c-fin .wrap{height:auto; display:block}
   .c-fin .tx{width:auto; padding-top:0}
   .c-fin h2{font-size:30px}
-}
-/* a phone held upright (2026-11-26, the second '덜컹거림' note): nothing sticks there any more. A window that stops and
-   then lets go reads as a jolt under the thumb, so 현장 and 구조 simply stack like the rest of the page: the take as a
-   square (the phone's own square copy, take-m.mp4) over 현장's words, 구조's own square still over its words */
-@media (max-width:1023px) and (orientation:portrait){
-  .c-pin .stick{position:relative; height:auto; aspect-ratio:1}
-  .c-pin .shade,.c-pin .step .mo::after{background:linear-gradient(180deg, rgba(3,27,31,.45) 0, rgba(3,27,31,0) 22%, rgba(3,27,31,0) 66%, rgba(3,27,31,.85) 92%, #031b1f 100%)}
-  .c-pin .steps{margin-top:0}
-  .c-pin .step{display:block; min-height:0; padding:0 0 56px}
-  .c-pin .step .in{opacity:1}
-  .c-pin #c-crew .in{margin-top:-28px; position:relative}
-  .c-pin .step .mo{display:block; position:relative; margin:0 -16px 0; aspect-ratio:1; overflow:hidden; background:var(--ink-c)}
-  .c-pin .step .mo img{width:100%; height:100%; object-fit:cover}
-  .c-pin .step .mo::after{content:""; position:absolute; inset:0}
-  .c-pin #c-rescue .in{margin-top:-28px; position:relative}
 }
 @media (prefers-reduced-motion: reduce){
   .c-wall li,.c-wall .base,.c-wall li.w::after,.c-wall .glow,.c-fin .key{transition:none}

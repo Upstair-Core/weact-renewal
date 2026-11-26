@@ -2,8 +2,8 @@
    as you scroll in, and the film cards that play only while they are on screen. (Count-up of the band is site.js's.)
    2026-11-26 ('01에서 02 넘어갈 때 자동으로 넘어가지 않게, 스크롤할 때 부드럽게'): the words no longer swap on a threshold
    with a timed fade. They sit in the page's flow and move with the finger; on wide screens they only fade with their
-   distance from the middle of the screen, a pure function of the scroll position. On an upright phone nothing here
-   moves at all (c.css stacks 현장 and 구조).
+   distance from where they belong, a pure function of the scroll position. Phones work the same way (the take stays
+   behind, only the words change: the client asked for it as on a wide screen), on a 9:16 copy of the take.
    Second note the same day ('여전히 덜컹거리는 느낌'): a scroll frame reads no layout any more. Where everything sits is
    measured once (load, fonts, any change of the page's size) and each frame is arithmetic on scrollY plus a few writes,
    so the page never has to lay itself out again in the middle of a scroll. */
@@ -12,11 +12,10 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const upright = matchMedia('(max-width:1023px) and (orientation:portrait)');   // c.css: 현장 and 구조 stacked
-  const top = $('.top'), rail = $('.c-rail'), words = $$('.c-pin .step .in');
+  const top = $('.top'), rail = $('.c-rail'), steps = $$('.c-pin .step');
   const cam = rail && $('.cam', rail), fill = rail && $('.fill', rail);
   const marks = ['#c-field', '#c-rescue', '#c-care', '#c-adopt', '#c-home'].map(s => $(s));
-  const tones = $$('[data-tone]');
+  const tones = $$('[data-tone]'), dawn = $('.c-dawn');
   const fin = $('#c-home'), wall = fin && $('.c-wall', fin), cells = wall ? $$('li', wall) : [];
 
   // ---- measured once, used every frame
@@ -25,11 +24,11 @@
     const y = el => el.getBoundingClientRect().top + scrollY;
     vh = innerHeight;
     stops = [y(marks[0]) - vh * .2, y(marks[1]), y(marks[2]) - vh * .3, y(marks[3]) - vh * .3, y(marks[4]) - vh * .4];
-    spans = upright.matches ? [] : words.map(el => { const t = y(el); return [el, t + el.offsetHeight / 2]; });
+    spans = steps.map(st => [$('.in', st), y(st)]);   // a step is a screen tall: its words are home when its top meets the screen's
     toneAt = tones.map(el => { const t = y(el); return [t, t + el.offsetHeight, el.dataset.tone === 'day']; });
+    if (dawn) { const t = y(dawn), h = dawn.offsetHeight; toneAt.push([t, t + h * .55, false], [t + h * .55, t + h, true]); }   // night turns to day in it
     finTop = fin ? y(fin) : 0;
     railShown = !!rail && getComputedStyle(rail).display !== 'none';
-    if (upright.matches) words.forEach(el => el.style.removeProperty('--o'));
     last = {};
   }
   const dayAt = py => { for (const [a, b, d] of toneAt) if (py >= a && py < b) return d; return false; };
@@ -77,9 +76,10 @@
   const put = (k, v, fn) => { if (last[k] !== v) { last[k] = v; fn(v); } };
   function frame() {
     const s = scrollY;
-    // words over the take (wide screens): fully there within 16% of the screen from the middle, gone 26% further on
-    for (const [el, mid] of spans) {
-      const o = clamp(1 - (Math.abs(mid - s - vh / 2) - vh * .16) / (vh * .26)).toFixed(3);
+    // words over the take: fully there while their step is within 16% of a screen from home, gone 26% further on
+    // (centred words on a wide screen, words low over the picture on a phone: the same measure fits both)
+    for (const [el, at] of spans) {
+      const o = clamp(1 - (Math.abs(at - s) - vh * .16) / (vh * .26)).toFixed(3);
       if (el._o !== o) { el._o = o; el.style.setProperty('--o', o); }
     }
     finale(s);

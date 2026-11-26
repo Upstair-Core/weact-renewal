@@ -67,15 +67,23 @@
 .c-ways{padding:calc(var(--u)*110) 0 calc(var(--u)*72); color:#fff; background:linear-gradient(180deg, #073338 0%, #0b3d43 100%)}
 
 /* ---- night → day: a long band of its own between the ways and 입양 (2026-11-26: '그라데이션 영역을 넓게, 자연스럽게, grain').
-   The stops are worked out in OKLab, where equal steps look equal (blending in sRGB passes through a dull green and the
-   eye sees a line), eased with smootherstep so neither end of the blend shows; a faint warm light rises in the lower
-   half, and a still grain lies over it all, faded in and out at the edges so the texture has no seam. ---- */
+   The stops come from tools/c_dawn.py: worked out in OKLab, where equal steps look equal (blending in sRGB passes through
+   a dull green and the eye sees a line), lightness eased so neither end shows. Same day, 5th note ('C 네모처럼 살짝
+   파랑빛으로 빠지면서 오묘하게, 아주 미묘하게 푸른 컬러 섞인채로 화이트로'): the teal clears through the C tile's aqua
+   (#80d0c7) into a faint ice blue before the mist; a soft aqua light and a fainter blue one lie over it (each wholly
+   inside the band, so no light meets an edge), and a fine still grain, one speck per screen pixel, over it all. ---- */
 .c-dawn{position:relative; height:clamp(320px, 72vh, 780px); overflow:hidden;
-  background:linear-gradient(180deg, #0b3d43 0%, #0c3d43 6.25%, #104046 12.5%, #18454b 18.75%, #254e53 25%, #365b60 31.25%, #4a6b70 37.5%, #617e82 43.75%, #7b9397 50%, #94a9ac 56.25%, #adbdc0 62.5%, #c3d0d2 68.75%, #d5dee0 75%, #e2e9eb 81.25%, #eaf0f1 87.5%, #edf3f4 93.75%, #eef3f4 100%)}
-.c-dawn .sun{position:absolute; left:50%; top:30%; width:150%; height:64%; translate:-50% 0; pointer-events:none;   /* wholly inside the band, so the light never meets an edge */
-  background:radial-gradient(closest-side, rgba(233,180,124,.17), rgba(233,180,124,.07) 52%, rgba(233,180,124,0))}
-.c-dawn::after{content:""; position:absolute; inset:0; pointer-events:none; background:url(grain.png) 0 0 / 192px 192px repeat;
-  mix-blend-mode:overlay; opacity:.42;
+  background:linear-gradient(180deg, #0b3d43 0%, #0c3d43 4.167%, #0d3f45 8.333%, #104248 12.5%, #14474c 16.67%, #194d52 20.83%, #205459 25%, #285d61 29.17%, #31676b 33.33%, #3b7375 37.5%, #457f81 41.67%, #508d8d 45.83%, #5c9b99 50%, #69a9a5 54.17%, #77b6b2 58.33%, #87c3bf 62.5%, #96cecc 66.67%, #a6d8d9 70.83%, #b6e0e3 75%, #c6e7ec 79.17%, #d3ecf3 83.33%, #ddf0f7 87.5%, #e4f2f7 91.67%, #eaf3f6 95.83%, #eef3f4 100%)}
+.c-dawn .aq,.c-dawn .bl{position:absolute; translate:-50% 0; pointer-events:none}
+.c-dawn .aq{left:58%; top:34%; width:150%; height:52%;
+  background:radial-gradient(closest-side, rgba(128,208,199,.20), rgba(128,208,199,.08) 55%, rgba(128,208,199,0))}
+.c-dawn .bl{left:24%; top:52%; width:110%; height:40%;
+  background:radial-gradient(closest-side, rgba(188,214,240,.22), rgba(188,214,240,.08) 55%, rgba(188,214,240,0))}
+.c-dawn::after{content:""; position:absolute; inset:0; pointer-events:none;
+  background:url(grain-dawn@2x.png) 0 0 / 160px 160px repeat;
+  background-image:-webkit-image-set(url(grain-dawn@1x.png) 1x, url(grain-dawn@2x.png) 2x, url(grain-dawn@3x.png) 3x);
+  background-image:image-set(url(grain-dawn@1x.png) 1x, url(grain-dawn@2x.png) 2x, url(grain-dawn@3x.png) 3x);
+  mix-blend-mode:overlay; opacity:.45;
   -webkit-mask:linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent); mask:linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent)}
 .c-head{max-width:calc(var(--u)*720); margin:0 auto calc(var(--u)*56); text-align:center}
 .c-head .rule{margin:0 auto calc(var(--u)*20)}

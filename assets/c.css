@@ -42,6 +42,7 @@
 .c-pin h2{font-size:max(30px, calc(var(--u)*44)); line-height:1.26; color:#fff; text-wrap:initial}
 .c-pin h2 b{color:var(--mint)}
 .c-pin .desc{margin-top:calc(var(--u)*18); max-width:30em}
+.c-pin .step .mo{display:none}
 
 /* ---- 4 · split sections: 구조 소식 and 치료와 임시보호 (a pair, the picture swapping sides), then 입양 ---- */
 .c-split{position:relative; padding:calc(var(--u)*120) 0; color:#fff}
@@ -67,7 +68,8 @@
 .c-ways{padding:calc(var(--u)*110) 0 calc(var(--u)*120); color:#fff; background:linear-gradient(180deg, #073338 0%, #134f55 100%)}
 .c-head{max-width:calc(var(--u)*720); margin:0 auto calc(var(--u)*56); text-align:center}
 .c-head .rule{margin:0 auto calc(var(--u)*20)}
-.c-head p{margin:calc(var(--u)*16) auto 0; max-width:36em; font-size:max(15px, calc(var(--u)*16.5)); line-height:1.75; color:rgba(255,255,255,.82)}
+.c-head p{margin:calc(var(--u)*16) auto 0; max-width:36em; font-size:max(15px, calc(var(--u)*16.5)); line-height:1.75; color:rgba(255,255,255,.82); text-wrap:balance}
+.c-head p > span{display:block; text-wrap:balance}   /* one sentence a line, each balanced on its own (a <br> stops balance) */
 .vcards{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:calc(var(--u)*22); margin:0; padding:0; list-style:none}
 .vcard,.pcard{position:relative; display:block; aspect-ratio:3/4; overflow:hidden; background:#0a3f45; color:#fff; text-decoration:none}
 .vcard video,.pcard img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .8s var(--ease)}
@@ -183,9 +185,13 @@
   #c-news{padding-bottom:40px} #c-care{padding-top:40px}
   .c-split .grid,.c-split .grid.rev{grid-template-columns:1fr; gap:28px}
   .c-split .grid.rev figure{order:0}
-  .vcards{grid-auto-flow:column; grid-template-columns:none; grid-auto-columns:78%; overflow-x:auto; scroll-snap-type:x mandatory; margin:0 -16px; padding:0 16px; scrollbar-width:none}
+  /* card rows scroll sideways. Snapping is measured from the 16 px padding (scroll-padding), so the first card keeps the
+     column's left edge instead of snapping flush to the screen; a 4 px tail (+ the gap) keeps the last card off the right */
+  .vcards{display:flex; gap:12px; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x mandatory; scroll-padding-inline:16px;
+    margin:0 -16px; padding:0 0 0 16px; scrollbar-width:none}
   .vcards::-webkit-scrollbar{display:none}
-  .vcards li{scroll-snap-align:start}
+  .vcards::after{content:""; flex:0 0 4px}
+  .vcards li{flex:0 0 78%; scroll-snap-align:start}
   .c-split.light{padding:150px 0 72px}
   .c-wait{margin-top:56px}
   .c-wait header{padding-top:22px}
@@ -211,14 +217,20 @@
   .c-fin .tx{width:auto; padding-top:0}
   .c-fin h2{font-size:30px}
 }
-/* a phone held upright would show only the middle quarter of the 16:9 take (the WE ACT! on the back cut in half): there
-   the take is a window at the top that stays while the words scroll up under its lower edge, like any page */
+/* a phone held upright (2026-11-26, the second '덜컹거림' note): nothing sticks there any more. A window that stops and
+   then lets go reads as a jolt under the thumb, so 현장 and 구조 simply stack like the rest of the page: the take as a
+   square (the phone's own square copy, take-m.mp4) over 현장's words, 구조's own square still over its words */
 @media (max-width:1023px) and (orientation:portrait){
-  .c-pin .stick{z-index:2; height:58vh; height:58svh}
-  .c-pin .shade{background:linear-gradient(180deg, rgba(3,27,31,.5) 0, rgba(3,27,31,0) 22%, rgba(3,27,31,0) 64%, rgba(3,27,31,.8) 88%, #031b1f 100%)}
+  .c-pin .stick{position:relative; height:auto; aspect-ratio:1}
+  .c-pin .shade,.c-pin .step .mo::after{background:linear-gradient(180deg, rgba(3,27,31,.45) 0, rgba(3,27,31,0) 22%, rgba(3,27,31,0) 66%, rgba(3,27,31,.85) 92%, #031b1f 100%)}
   .c-pin .steps{margin-top:0}
-  .c-pin .step{display:block; min-height:0; padding:28px 0 6svh}
+  .c-pin .step{display:block; min-height:0; padding:0 0 56px}
   .c-pin .step .in{opacity:1}
+  .c-pin #c-crew .in{margin-top:-28px; position:relative}
+  .c-pin .step .mo{display:block; position:relative; margin:0 -16px 0; aspect-ratio:1; overflow:hidden; background:var(--ink-c)}
+  .c-pin .step .mo img{width:100%; height:100%; object-fit:cover}
+  .c-pin .step .mo::after{content:""; position:absolute; inset:0}
+  .c-pin #c-rescue .in{margin-top:-28px; position:relative}
 }
 @media (prefers-reduced-motion: reduce){
   .c-wall li,.c-wall .base,.c-wall li.w::after,.c-wall .glow,.c-fin .key{transition:none}

@@ -332,7 +332,10 @@
   };
   window.weactCount = reduce ? () => {} : run;
   if (counts.length && !reduce && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); run(e.target); } }), { threshold: .4 });
+    // starts only once the whole number is clear of the bottom fifth of the screen: on a phone the first number of the C
+    // band met the old 40%-showing mark at the very bottom edge, under the browser's toolbar, and finished counting
+    // before anyone saw it (2026-11-26: '구조된 동물들 수는 카운트가 안 올라가고')
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); run(e.target); } }), { threshold: 1, rootMargin: '0px 0px -18% 0px' });
     counts.forEach(el => { el.textContent = '0'; io.observe(el); });
   }
 

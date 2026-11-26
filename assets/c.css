@@ -50,8 +50,8 @@
 .c-split .grid.rev figure{order:2}
 .c-split figure{margin:0; aspect-ratio:4/3; overflow:hidden; background:var(--teal-800)}
 .c-split figure img{width:100%; height:100%; object-fit:cover}
-#c-news{padding-bottom:calc(var(--u)*64); background:linear-gradient(180deg, #031b1f 0%, #042429 100%)}
-#c-care{padding-top:calc(var(--u)*64); background:linear-gradient(180deg, #042429 0%, #062e33 100%)}
+#c-news{padding-bottom:calc(var(--u)*64); background:linear-gradient(180deg, #042429 0%, #052a2f 100%)}
+#c-care{padding-top:calc(var(--u)*64); background:linear-gradient(180deg, #052a2f 0%, #073338 100%)}
 .c-news{list-style:none; margin:calc(var(--u)*26) 0 0; padding:0; border-top:1px solid rgba(255,255,255,.18)}
 .c-news a{display:grid; grid-template-columns:calc(var(--u)*60) minmax(0,1fr) auto; align-items:center; gap:calc(var(--u)*18);
   padding:calc(var(--u)*12) 0; border-bottom:1px solid rgba(255,255,255,.18); color:#fff; text-decoration:none}
@@ -62,8 +62,9 @@
 .c-news a:hover img{filter:none}
 
 /* ---- 5 · film and photo cards ---- */
-.c-cards{padding:calc(var(--u)*120) 0 calc(var(--u)*130); color:#fff; background:linear-gradient(180deg, #062e33 0%, #0a3f45 100%)}
-.c-ways{padding:calc(var(--u)*110) 0 calc(var(--u)*120); color:#fff; background:linear-gradient(180deg, #0a3f45 0%, #134f55 100%)}
+/* 현장의 기록 closes the 현장 · 구조 group: straight under the take, on the same night */
+.c-cards{padding:calc(var(--u)*96) 0 calc(var(--u)*130); color:#fff; background:linear-gradient(180deg, #031b1f 0%, #042429 100%)}
+.c-ways{padding:calc(var(--u)*110) 0 calc(var(--u)*120); color:#fff; background:linear-gradient(180deg, #073338 0%, #134f55 100%)}
 .c-head{max-width:calc(var(--u)*720); margin:0 auto calc(var(--u)*56); text-align:center}
 .c-head .rule{margin:0 auto calc(var(--u)*20)}
 .c-head p{margin:calc(var(--u)*16) auto 0; max-width:36em; font-size:max(15px, calc(var(--u)*16.5)); line-height:1.75; color:rgba(255,255,255,.82)}
@@ -77,16 +78,36 @@
 .cap small{display:block; margin-top:8px; font-size:14px; line-height:1.6; color:rgba(255,255,255,.82)}
 .cap .more{display:flex; align-items:center; gap:10px; margin-top:calc(var(--u)*16); padding-top:calc(var(--u)*14); border-top:1px solid rgba(255,255,255,.28); font:700 14px/1 var(--display)}
 .cap .more::before{content:""; width:28px; height:28px; border-radius:50%; background:var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8h9M8.5 4.5 12 8l-3.5 3.5' fill='none' stroke='%23031b1f' stroke-width='1.6'/%3E%3C/svg%3E") center/14px no-repeat}
-/* night turns to day after the ways, under 입양, not behind the cards */
-.c-split.light{padding-top:calc(var(--u)*150); color:var(--teal-900); background:linear-gradient(180deg, #134f55 0%, #6f9fa0 9%, #cfe1df 24%, #eef3f4 100%)}
+/* ---- 입양: night turns to day above it in the palette's own steps (teal-500, -300, -100, mist), so the blend never
+   passes through grey; then two levels — the story (the same split as 구조 소식 and 치료) and, under it across the
+   column, the dogs waiting now. The page body is t-night, so every colour here is written out, not taken from the
+   night tokens (--ln-2 there is a light hairline: on this ground the second button had no edge at all). ---- */
+.c-split.light{padding:calc(var(--u)*230) 0 calc(var(--u)*130); color:#062e33;
+  background:linear-gradient(180deg, #134f55 0, #2c7378 calc(var(--u)*46), #8db8b7 calc(var(--u)*104), #dbe8e7 calc(var(--u)*152), #eef3f4 calc(var(--u)*196), #f3f6f5 100%)}
 .c-split.light h2,.c-split.light .kick{color:var(--key)}
 .c-split.light .rule{background:var(--key)}
-.c-split.light .lede{color:var(--teal-900)} .c-split.light .desc{color:rgba(6,46,51,.75)}
-.c-split.light .btn:not(.pri){background:none; border-color:var(--ln-2); color:var(--teal-900)}
-.c-split.light .card .nm{color:var(--teal-900)}
-.cards.dogs.four{grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin-top:calc(var(--u)*24)}
-.cards.dogs.four .pic{aspect-ratio:1}
-.cards.dogs.four .sub,.cards.dogs.four .t{display:none}
+.c-split.light .lede{color:#062e33} .c-split.light .desc{color:rgba(6,46,51,.74)}
+.chome .light .btn:not(.pri),.c-fin .btn:not(.pri){background:transparent; border:1px solid rgba(6,46,51,.32); color:#062e33}
+.chome .light .btn:not(.pri):hover,.c-fin .btn:not(.pri):hover{border-color:#062e33; background:rgba(6,46,51,.04)}
+.c-wait{margin-top:calc(var(--u)*96)}
+.c-wait header{display:flex; align-items:center; justify-content:space-between; gap:16px; padding-top:calc(var(--u)*28); border-top:1px solid rgba(6,46,51,.16)}
+.c-wait h3{margin:0; font:700 max(19px, calc(var(--u)*22))/1.3 var(--display); letter-spacing:-.02em; color:#062e33}
+.c-wait h3 span{white-space:nowrap}   /* the count never stands alone on a line */
+.c-wait h3 b{margin-left:.3em; font-weight:800; color:var(--key); font-variant-numeric:tabular-nums}
+.c-wait .btn.line{flex:none; gap:12px; white-space:nowrap}
+.c-wait .btn.line i{width:14px; height:14px; background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8h11M9 4l4 4-4 4' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8h11M9 4l4 4-4 4' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3C/svg%3E") center/contain no-repeat}
+.c-wait ul{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:calc(var(--u)*20); margin:calc(var(--u)*28) 0 0; padding:0; list-style:none}
+.c-dog{display:block; color:#062e33; text-decoration:none}
+.c-dog .pic{display:block; aspect-ratio:1; overflow:hidden; background:#dbe8e7}
+.c-dog .pic img{width:100%; height:100%; object-fit:cover; transition:transform .7s var(--ease)}
+.c-dog:hover .pic img,.c-dog:focus-visible .pic img{transform:scale(1.04)}
+.c-dog .row{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:calc(var(--u)*14)}
+.c-dog b{font:800 max(17px, calc(var(--u)*18))/1.25 var(--display); letter-spacing:-.02em; transition:color .16s}
+.c-dog:hover b{color:var(--key)}
+.c-dog small{flex:none; padding:3px 8px; border:1px solid rgba(11,110,120,.35); font:700 12px/1.2 var(--display); color:var(--key)}
+.c-dog .mt{display:block; margin-top:6px; font-size:max(14px, calc(var(--u)*14)); color:rgba(6,46,51,.64); font-variant-numeric:tabular-nums}
 
 /* ---- 6 · 집: A's wall. 22×12 squares, one rescued child each, cover the section; the grey picture is one layer (the film's
    atlas), each child a square that lights over it (opacity only), and WE (33 squares) settles into act teal. ---- */
@@ -122,7 +143,6 @@
 .c-fin h2{font-weight:800; font-size:max(30px, calc(var(--u)*46)); line-height:1.2; color:var(--teal-900)}
 .c-fin h2 .we{font-weight:900; color:var(--key)}
 .c-fin .desc{color:rgba(6,46,51,.78)}
-.c-fin .btn:not(.pri){background:none; border-color:var(--ln-2); color:var(--teal-900)}
 .c-fin .key{position:absolute; z-index:2; right:var(--rx); bottom:calc(var(--u)*28); display:flex; align-items:center; gap:10px; margin:0; padding:7px 12px;
   background:rgba(246,248,247,.86); font-size:max(12px, calc(var(--u)*12)); letter-spacing:.02em; color:rgba(6,46,51,.76); white-space:nowrap; opacity:0; transition:opacity .8s var(--ease) .3s}
 .c-fin.formed .key{opacity:1}
@@ -163,11 +183,18 @@
   #c-news{padding-bottom:40px} #c-care{padding-top:40px}
   .c-split .grid,.c-split .grid.rev{grid-template-columns:1fr; gap:28px}
   .c-split .grid.rev figure{order:0}
-  .c-split.light{padding-top:96px}
   .vcards{grid-auto-flow:column; grid-template-columns:none; grid-auto-columns:78%; overflow-x:auto; scroll-snap-type:x mandatory; margin:0 -16px; padding:0 16px; scrollbar-width:none}
   .vcards::-webkit-scrollbar{display:none}
   .vcards li{scroll-snap-align:start}
-  .cards.dogs.four{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .c-split.light{padding:150px 0 72px}
+  .c-wait{margin-top:56px}
+  .c-wait header{padding-top:22px}
+  .c-wait h3{font-size:18px}
+  .c-wait .btn.line{min-height:38px; padding:0 12px; gap:8px; font-size:13.5px}
+  .c-wait ul{grid-template-columns:repeat(2, minmax(0,1fr)); gap:24px 12px}
+  .c-wait li:nth-child(n+5){display:none}   /* two rows of two on a phone */
+  .c-dog small{padding:2px 6px; font-size:11px}
+  .c-cards{padding-top:64px}
   .c-rail{display:none}
   /* 집 on a phone: WE (columns 10–19, rows 2–8) across the top, squares 1/11 of the width, the legend under it, then the words */
   .c-fin{--tw:calc(100vw / 11); height:auto; min-height:0; padding:calc(var(--tw) * 7.6 + 92px) 0 64px}
